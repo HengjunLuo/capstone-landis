@@ -20,7 +20,7 @@ import logging
 # Escape key code
 #escape_keycode = r"'\x03'" # Code for ctrl+c
 
-# Another widely used option is the grave key:
+# Another widely used option is the grave key: Alt+` " ` " is also the button for " ~ "". Should be the button above tab
 escape_keycode = r"'`'"
 
 """
