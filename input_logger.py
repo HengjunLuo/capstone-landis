@@ -18,10 +18,10 @@ from pynput import mouse, keyboard
 import logging
 
 # Escape key code
-escape_keycode = r"'\x03'" # Code for ctrl+c
+#escape_keycode = r"'\x03'" # Code for ctrl+c
 
 # Another widely used option is the grave key:
-#escape_keycode = r"'`'"
+escape_keycode = r"'`'"
 
 """
 Logging mechanism:
@@ -88,5 +88,8 @@ def escape_key_press(key):
     if str(key) == escape_keycode:
         exit(0)
 
-with keyboard.Listener(on_press=escape_key_press, suppress=True) as el:
-    el.join() # Main thread blocks until Listener thread finishes
+with keyboard.Listener(on_press=escape_key_press) as el:
+    try:
+        el.join() # Main thread blocks until Listener thread finishes
+    except:
+        ... # Suppress annoying error messages when program terminates
