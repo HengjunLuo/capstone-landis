@@ -29,7 +29,7 @@ Logging mechanism:
     Record all mouse actions to "mouse_actions.log" (same directory)
 
 I basically just grabbed the setup_logger code from some stackechange thread
-so I dont really know how it works but it does
+so I dont really know how it works but it does...
 """
 def setup_logger(name, log_filename):
     handler = logging.FileHandler(log_filename)
