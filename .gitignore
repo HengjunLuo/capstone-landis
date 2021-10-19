@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs
+.ipynb_checkpoints
+keyboard_actions.log
+mouse_actions.log

@@ -1,8 +1,7 @@
 """
-Test Push
 Input logging script
 One thread for each input device (keyboard, mouse)
-Main thread blocks until escape key is pressed (ctrl+c)
+Main thread blocks until escape key is pressed (grave key `)
 
 Dependencies:
 - pynput
@@ -11,38 +10,43 @@ Considerations:
 - Better way to log mouse movement actions?
 - Should there be an escape key at all or should the process be stopped through
 another method? (e.g. Task manager)
-- Should log files be cleared automatically when script is run?
-- Input logging format?
 """
 
 from pynput import mouse, keyboard
+import time
 import logging
 
 # Escape key code
+# A widely used option is the grave key
+# Alt+` " ` " is also the button for " ~ ". Should be the button above tab
+
+escape_keycode = r"'`'"
 #escape_keycode = r"'\x03'" # Code for ctrl+c
 
-# Another widely used option is the grave key: Alt+` " ` " is also the button for " ~ "". Should be the button above tab
-escape_keycode = r"'`'"
+prog_start_time = time.perf_counter()
 
 """
 Logging mechanism:
     Record all keystrokes to "keyboard_actions.log" (same directory)
     Record all mouse actions to "mouse_actions.log" (same directory)
-
-I basically just grabbed the setup_logger code from some stackechange thread
-so I dont really know how it works but it does...
+    Records are logged as csv files for easy parsing
+    Clears old log files every time keylogger is run
 """
 def setup_logger(name, log_filename):
-    handler = logging.FileHandler(log_filename)
-    # This line determines the overall log format
-    handler.setFormatter(logging.Formatter('%(asctime)s: %(message)s'))
+    # File handler manages i/o to the logfile
+    handler = logging.FileHandler(log_filename, mode='w')
+    
+    # This line determines the general log format ([elapsed time]: [action])
+    handler.setFormatter(logging.Formatter('%(elapsed_time).4f,%(message)s')) # the '.4' determines how many decimal places to log
 
+    # Initialize the logger and attach the handler
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
-
+    
     return logger
 
+# Create a logger to handle output to each file
 mouse_logger = setup_logger("mouse_logger", "mouse_actions.log")
 keyboard_logger = setup_logger("keyboard_logger", "keyboard_actions.log")
 
@@ -50,21 +54,26 @@ keyboard_logger = setup_logger("keyboard_logger", "keyboard_actions.log")
 Functions defining the specific formats in which inputs are logged
 """
 def log_move(x, y):
-    mouse_logger.info(str((x, y)))
+    log_action( mouse_logger, f"{x:04},{y:04},None,None" )
 
 def log_click(x, y, button, pressed):
-    click_type = 'Pressed' if pressed else 'Released'
-    mouse_logger.info("{0} {1}".format(click_type, str((x, y))))
+    click_type = 'pressed' if pressed else 'released'
+    log_action( mouse_logger, "{0},{1},{2}".format(f"{x:04},{y:04}", str(button)[7:], click_type) )
 
 def log_scroll(x, y, dx, dy):
     scroll_dir = 'down' if dy < 0 else 'up'
-    mouse_logger.info("scroll_{0} {1}".format(str(scroll_dir), str((x, y))))
+    log_action( mouse_logger, "{0},scroll,{1}".format(f"{x:04},{y:04}", str(scroll_dir)) )
 
 def log_key_press(key):
-    keyboard_logger.info("pressed {0}".format(str(key)))
+    log_action( keyboard_logger, "{0},pressed".format(str(key)) )
 
 def log_key_release(key):
-    keyboard_logger.info("released {0}".format(str(key)))
+    log_action( keyboard_logger, "{0},released".format(str(key)) )
+    
+# Intermediary logging function
+# Make the script more readable and less error-prone
+def log_action(logger, message):
+    logger.info(message, extra={'elapsed_time': time.perf_counter() - prog_start_time})
 
 """
 Create event listener threads
