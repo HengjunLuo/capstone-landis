@@ -1,29 +1,29 @@
 """
-Input logging script
+Input logging module
 One thread for each input device (keyboard, mouse)
-Main thread blocks until escape key is pressed (grave key `)
 
 Dependencies:
 - pynput
 
 Considerations:
 - Better way to log mouse movement actions?
-- Should there be an escape key at all or should the process be stopped through
-another method? (e.g. Task manager)
 """
 
 from pynput import mouse, keyboard
 import time
 import logging
 
+
 # Escape key code
 # A widely used option is the grave key
 # Alt+` " ` " is also the button for " ~ ". Should be the button above tab
+pause_keycode = r"'`'"
+# Code for ctrl+c
+#pause_keycode = r"'\x03'"
 
-escape_keycode = r"'`'"
-#escape_keycode = r"'\x03'" # Code for ctrl+c
+is_running = False
 
-prog_start_time = time.perf_counter()
+logging_start_time = 0
 
 """
 Logging mechanism:
@@ -46,9 +46,17 @@ def setup_logger(name, log_filename):
     
     return logger
 
+
 # Create a logger to handle output to each file
 mouse_logger = setup_logger("mouse_logger", "mouse_actions.log")
 keyboard_logger = setup_logger("keyboard_logger", "keyboard_actions.log")
+
+# Change directory where logs are saved
+def set_log_directory(dir):
+    global mouse_logger, keyboard_logger
+    mouse_logger = setup_logger("mouse_logger", dir + "mouse_actions.log")
+    keyboard_logger = setup_logger("keyboard_logger", dir + "keyboard_actions.log")
+
 
 """
 Functions defining the specific formats in which inputs are logged
@@ -66,36 +74,66 @@ def log_scroll(x, y, dx, dy):
 
 def log_key_press(key):
     log_action( keyboard_logger, "{0},pressed".format(str(key)) )
+    if str(key) == pause_keycode:
+        stop()
 
 def log_key_release(key):
     log_action( keyboard_logger, "{0},released".format(str(key)) )
+
+"""    
+Intermediary logging function
+Make the script more readable and less error-prone
+"""
+def log_action( logger, message):
+    logger.info(message, extra={'elapsed_time': time.perf_counter() - logging_start_time})
+
+# Declare listeners
+mouse_listener = None
+keyboard_listener = None
+
+# "Resume" threads by starting new ones
+def resume():
+    global mouse_listener, keyboard_listener, is_running
+
+    #Create new event listener threads
+    mouse_listener = mouse.Listener(
+        on_move=log_move,
+        on_click=log_click,
+        on_scroll=log_scroll)
+    keyboard_listener = keyboard.Listener(
+        on_press=log_key_press,
+        on_release=log_key_release)
+
+    mouse_listener.start()
+    keyboard_listener.start()
+
+    is_running = True
+
+# "Start" threads (more importantly start the counter)
+def start():
+    global logging_start_time
+    logging_start_time = time.perf_counter()
+    resume()
+
+# Stop listener threads
+def stop():
+    mouse_listener.stop()
+    keyboard_listener.stop()
+
+    global is_running
+    is_running = False
+
+# "Pause" listener threads by killing them
+def pause():
+    stop()
     
-# Intermediary logging function
-# Make the script more readable and less error-prone
-def log_action(logger, message):
-    logger.info(message, extra={'elapsed_time': time.perf_counter() - prog_start_time})
 
-"""
-Create event listener threads
-"""
-mouseListener = mouse.Listener(
-    on_move=log_move,
-    on_click=log_click,
-    on_scroll=log_scroll)
-
-keyboardListener = keyboard.Listener(
-    on_press=log_key_press,
-    on_release=log_key_release)
-
-# Start threads
-mouseListener.start()
-keyboardListener.start()
 
 """
 Block main thread until escape key is pressed
-"""
+
 def escape_key_press(key):
-    if str(key) == escape_keycode:
+    if str(key) == pause_keycode:
         exit(0)
 
 with keyboard.Listener(on_press=escape_key_press) as el:
@@ -103,3 +141,4 @@ with keyboard.Listener(on_press=escape_key_press) as el:
         el.join() # Main thread blocks until Listener thread finishes
     except:
         ... # Suppress annoying error messages when program terminates
+"""
