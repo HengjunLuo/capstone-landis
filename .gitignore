@@ -3,4 +3,5 @@
 logs/
 .ipynb_checkpoints
 .preferences
+__pycache__
 __pycache__/
