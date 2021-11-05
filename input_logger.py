@@ -21,7 +21,8 @@ pause_keycode = r"'`'"
 # Code for ctrl+c
 #pause_keycode = r"'\x03'"
 
-is_running = False
+running = False
+paused = False
 
 logging_start_time = 0
 
@@ -75,7 +76,8 @@ def log_scroll(x, y, dx, dy):
 def log_key_press(key):
     log_action( keyboard_logger, "{0},pressed".format(str(key)) )
     if str(key) == pause_keycode:
-        stop()
+        if paused: resume()
+        else: pause()
 
 def log_key_release(key):
     log_action( keyboard_logger, "{0},released".format(str(key)) )
@@ -85,15 +87,20 @@ Intermediary logging function
 Make the script more readable and less error-prone
 """
 def log_action( logger, message):
-    logger.info(message, extra={'elapsed_time': time.perf_counter() - logging_start_time})
+    if not paused:
+        logger.info(message, 
+            extra={'elapsed_time': time.perf_counter() - logging_start_time})
+
 
 # Declare listeners
 mouse_listener = None
 keyboard_listener = None
 
-# "Resume" threads by starting new ones
-def resume():
-    global mouse_listener, keyboard_listener, is_running
+
+# "Start" threads (more importantly start the counter)
+def start():
+    global mouse_listener, keyboard_listener, logging_start_time, running, paused
+    logging_start_time = time.perf_counter()
 
     #Create new event listener threads
     mouse_listener = mouse.Listener(
@@ -107,25 +114,28 @@ def resume():
     mouse_listener.start()
     keyboard_listener.start()
 
-    is_running = True
-
-# "Start" threads (more importantly start the counter)
-def start():
-    global logging_start_time
-    logging_start_time = time.perf_counter()
-    resume()
+    running = True
+    paused = False
 
 # Stop listener threads
 def stop():
+    global running, paused
+
     mouse_listener.stop()
     keyboard_listener.stop()
 
-    global is_running
-    is_running = False
+    running = False
+    paused = False
 
-# "Pause" listener threads by killing them
+# Set pause flag true (stop logging)
 def pause():
-    stop()
+    global paused
+    paused = True
+
+# Set pause flag to false and continue logging
+def resume():
+    global paused
+    paused = False
     
 
 

@@ -1,7 +1,5 @@
 """
 TODO:
-- create trace on string control variable that changes the 
-running label when keylogger.is_running changes
 - Integrate file system control for:
   - Validating paths
   - Moving logfiles when path changes
@@ -14,8 +12,9 @@ import input_logger as keylogger
 import tkinter as tk
 
 # Variables editable by gui
-pausekey = "a"
+pausekey = "`"
 root_logdir = "./"
+started = False
 
 # Non-editable names of log files
 mouse_logdir = "mouse_actions.log"
@@ -36,8 +35,9 @@ gui.columnconfigure(0, minsize=_windowwidth, weight=1)
 # ----- Frame widgets -----
 # Input logger status frame
 frm_status = tk.Frame(gui, width=400)
-#frm_status.rowconfigure(0, minsize=50)
-#frm_status.columnconfigure(0, minsize=80)
+frm_status.rowconfigure(0, minsize=50)
+frm_status.columnconfigure(0, minsize=100, weight=1)
+frm_status.columnconfigure(3, minsize=100, weight=1)
 
 # Settings frame
 frm_settings = tk.Frame(gui, width=400)
@@ -48,14 +48,14 @@ frm_settings.grid(row=1, sticky="ns")
 
 
 # ----- Status widgets -----
-lbl_running = tk.Label(frm_status)
-btn_toggle = tk.Button(frm_status, text="Start")
-btn_stop = tk.Button(frm_status, text="Stop", state='disabled')
+lbl_running = tk.Label(frm_status, width=30)
+btn_toggle = tk.Button(frm_status, text="Start", width=7)
+btn_stop = tk.Button(frm_status, text="Stop", state='disabled', width=7)
 
 # Status widgets positioning
-lbl_running.grid(row=0, columnspan=10)
-btn_toggle.grid(row=1, column=0, padx=5)
-btn_stop.grid(row=1, column=1, padx=5)
+lbl_running.grid(row=0, column=1, columnspan=2)
+btn_toggle.grid(row=1, column=1, padx=5)
+btn_stop.grid(row=1, column=2, padx=5)
 
 
 # Status widget behavior
@@ -63,15 +63,16 @@ def update_lbl_status(status):
     lbl_running['text'] = f"Input logger status: {status}"
 
 def toggle_status(event):
+    global started
     # State machine of toggle button
     if btn_toggle['text'] == "Start":
         keylogger.start()
-        update_lbl_status("Running")
         btn_toggle['text'] = "Pause"
         btn_stop['state'] = 'normal'
+        started = True
+        check_status() # Start periodic status update checks
     elif btn_toggle['text'] == "Pause":
         keylogger.pause()
-        update_lbl_status("Paused")
         btn_toggle['text'] = "Resume"
     elif btn_toggle['text'] == "Resume":
         keylogger.resume()
@@ -79,11 +80,29 @@ def toggle_status(event):
         btn_toggle['text'] = "Pause"
 
 def stop_keylogger(event):
+    global started
     # Stop keylogger
     keylogger.stop()
     btn_toggle['text'] = "Start"
     btn_stop['state'] = 'disabled'
     update_lbl_status("Stopped")
+
+def check_status():
+    if keylogger.running == False:
+        btn_toggle['text'] = "Start"
+        btn_stop['state'] = 'disabled'
+        update_lbl_status("Stopped")
+    else:
+        if keylogger.paused == True:
+            update_lbl_status("Paused")
+            btn_toggle['text'] = "Resume"
+        else:
+            update_lbl_status("Running")
+            btn_toggle['text'] = "Pause"
+
+    if keylogger.running:
+        gui.after(1000, check_status) # Run this function every second
+
 
 # Assign settings widget behavior
 btn_toggle.bind('<Button-1>', toggle_status)
