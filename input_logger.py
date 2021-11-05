@@ -182,18 +182,3 @@ def resume():
     global paused
     paused = False
     
-
-
-"""
-Block main thread until escape key is pressed
-
-def escape_key_press(key):
-    if str(key) == pause_keycode:
-        exit(0)
-
-with keyboard.Listener(on_press=escape_key_press) as el:
-    try:
-        el.join() # Main thread blocks until Listener thread finishes
-    except:
-        ... # Suppress annoying error messages when program terminates
-"""
