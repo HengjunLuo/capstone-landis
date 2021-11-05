@@ -12,6 +12,8 @@ Considerations:
 from pynput import mouse, keyboard
 import time
 import logging
+import re
+import random
 
 
 # Escape key code
@@ -23,6 +25,8 @@ pause_keycode = r"'`'"
 
 running = False
 paused = False
+
+log_dir = None
 
 logging_start_time = 0
 
@@ -48,15 +52,48 @@ def setup_logger(name, log_filename):
     return logger
 
 
-# Create a logger to handle output to each file
-mouse_logger = setup_logger("mouse_logger", "mouse_actions.log")
-keyboard_logger = setup_logger("keyboard_logger", "keyboard_actions.log")
+# Declare loggers
+mouse_logger = None
+keyboard_logger = None
+
+# Initialize loogers and create logging files
+def create_loggers():
+    global mouse_logger, keyboard_logger
+    # Create a logger to handle output to each file
+    mouse_logger = None
+    keyboard_logger = None
+    mouse_logger = setup_logger(str(random.randrange(1000)), log_dir + "mouse_actions.log")
+    keyboard_logger = setup_logger(str(random.randrange(1000)), log_dir + "keyboard_actions.log")
 
 # Change directory where logs are saved
 def set_log_directory(dir):
-    global mouse_logger, keyboard_logger
-    mouse_logger = setup_logger("mouse_logger", dir + "mouse_actions.log")
-    keyboard_logger = setup_logger("keyboard_logger", dir + "keyboard_actions.log")
+    global log_dir
+    log_dir = dir
+
+# Change the pause key
+def set_pause_key(key):
+    global pause_keycode
+
+    if re.fullmatch("\S", key):
+        pause_keycode = '\'' + key + '\''
+    elif re.fullmatch("quoteleft", key):
+        pause_keycode = r"'`'"
+    elif re.fullmatch("Control_L", key):
+        pause_keycode = "Key.ctrl_l"
+    elif re.fullmatch("Control_R", key):
+        pause_keycode = "Key.ctrl_r"
+    elif re.fullmatch("Escape", key):
+        pause_keycode = "Key.esc"
+    elif re.fullmatch("Shift_L", key):
+        pause_keycode = "Key.shift"
+    elif re.fullmatch("Shift_R", key):
+        pause_keycode = "Key.shift_r"
+    elif re.fullmatch("Prior", key):
+        pause_keycode = "Key.page_up"
+    elif re.fullmatch("Next", key):
+        pause_keycode = "Key.page_down"
+    else:
+        pause_keycode = f"Key.{key.lower()}"
 
 
 """
@@ -74,13 +111,15 @@ def log_scroll(x, y, dx, dy):
     log_action( mouse_logger, "{0},scroll,{1}".format(f"{x:04},{y:04}", str(scroll_dir)) )
 
 def log_key_press(key):
-    log_action( keyboard_logger, "{0},pressed".format(str(key)) )
     if str(key) == pause_keycode:
         if paused: resume()
         else: pause()
+    else:
+        log_action( keyboard_logger, "{0},pressed".format(str(key)) )
 
 def log_key_release(key):
-    log_action( keyboard_logger, "{0},released".format(str(key)) )
+    if str(key) != pause_keycode:
+        log_action( keyboard_logger, "{0},released".format(str(key)) )
 
 """    
 Intermediary logging function
@@ -111,6 +150,8 @@ def start():
         on_press=log_key_press,
         on_release=log_key_release)
 
+    create_loggers()
+
     mouse_listener.start()
     keyboard_listener.start()
 
@@ -119,10 +160,14 @@ def start():
 
 # Stop listener threads
 def stop():
-    global running, paused
+    global running, paused, mouse_logger, keyboard_logger
 
     mouse_listener.stop()
     keyboard_listener.stop()
+    mouse_logger.handlers[0].close()
+    keyboard_logger.handlers[0].close()
+    mouse_logger = None
+    keyboard_logger = None
 
     running = False
     paused = False
