@@ -42,7 +42,10 @@ def load_preferences():
         pausekey = data[0][10:-1]
         root_logdir = data[1][10:]
 
+
+
 # Load user preferences
+save_preferences()
 load_preferences()
 keylogger.set_log_directory(root_logdir)
 keylogger.set_pause_key(pausekey)
