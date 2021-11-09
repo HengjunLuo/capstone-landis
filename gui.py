@@ -37,15 +37,15 @@ def save_preferences():
 
 def load_preferences():
     global pausekey, root_logdir
-    with open('.preferences', 'r', encoding='utf-8') as f:
-        data = f.readlines()
-        pausekey = data[0][10:-1]
-        root_logdir = data[1][10:]
+    if pathlib.Path('.preferences').exists():
+        with open('.preferences', 'r', encoding='utf-8') as f:
+            data = f.readlines()
+            pausekey = data[0][10:-1]
+            root_logdir = data[1][10:]
 
 
 
 # Load user preferences
-save_preferences()
 load_preferences()
 keylogger.set_log_directory(root_logdir)
 keylogger.set_pause_key(pausekey)
@@ -53,6 +53,7 @@ keylogger.set_pause_key(pausekey)
 
 # Main window
 gui = tk.Tk()
+gui.title("Landis")
 gui.resizable(False, False)
 gui.rowconfigure(0, minsize=_windowheight/2, weight=1)
 gui.rowconfigure(1, minsize=_windowheight/2, weight=1)
