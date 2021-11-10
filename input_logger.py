@@ -29,6 +29,10 @@ paused = False
 log_dir = None
 
 logging_start_time = 0
+pause_time = 0
+
+# Keep track of currently pressed keys (remove repeated presses)
+pressed_keys = set()
 
 """
 Logging mechanism:
@@ -115,11 +119,14 @@ def log_key_press(key):
         if paused: resume()
         else: pause()
     else:
-        log_action( keyboard_logger, "{0},pressed".format(str(key)) )
+        if key not in pressed_keys:
+            log_action( keyboard_logger, "{0},pressed".format(str(key)) )
+            pressed_keys.add(key)
 
 def log_key_release(key):
     if str(key) != pause_keycode:
         log_action( keyboard_logger, "{0},released".format(str(key)) )
+        pressed_keys.remove(key)
 
 """    
 Intermediary logging function
@@ -174,11 +181,13 @@ def stop():
 
 # Set pause flag true (stop logging)
 def pause():
-    global paused
+    global paused, pause_time
     paused = True
+    pause_time = time.perf_counter()
 
 # Set pause flag to false and continue logging
 def resume():
-    global paused
+    global paused, logging_start_time
     paused = False
+    logging_start_time += (time.perf_counter() - pause_time)
     
