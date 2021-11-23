@@ -73,17 +73,34 @@ frm_settings = tk.Frame(gui, width=_windowwidth)
 frm_status.grid(row=0, sticky="ns")
 frm_settings.grid(row=1, sticky="ns")
 
+# Profiles to choose from
+profiles = [
+    "Jonathan",
+    "Marco",
+    "Zirui",
+    "Joseph",
+    "Hengjun",
+    "Mitchell",
+    "Other"
+]
+
+# variable stores selected profile
+curr_profile = tk.StringVar()
+  
+# initial profile
+curr_profile.set("Jonathan")
 
 # ----- Status widgets -----
 lbl_running = tk.Label(frm_status, width=25, font=("Helvetica", 12))
 btn_toggle = tk.Button(frm_status, text="Start", width=7)
 btn_stop = tk.Button(frm_status, text="Stop", state='disabled', width=7)
+btn_profile = tk.OptionMenu(frm_status, curr_profile, *profiles, command=keylogger.set_profile )
 
 # Status widgets positioning
-lbl_running.grid(row=0, column=1, columnspan=2)
+lbl_running.grid(row=0, column=1, columnspan=3)
 btn_toggle.grid(row=1, column=1, padx=5)
 btn_stop.grid(row=1, column=2, padx=5)
-
+btn_profile.grid(row=1, column=3)
 
 # Status widget behavior
 def update_lbl_status(status):
@@ -138,7 +155,6 @@ btn_stop.bind('<Button-1>', stop_keylogger)
 # Fill text fields with initial values
 update_lbl_status("Not started")
 
-
 # ----- Settings widgets -----
 # Title and info bar
 lbl_settings = tk.Label(frm_settings, text="Settings", font=("Helvetica", 14, "bold underline"))
@@ -168,6 +184,7 @@ ent_logdir.grid(row=2, column=1)
 btn_setlogdir.grid(row=3, column=1)
 
 # Settings widget behavior
+
 def update_lbl_pausekey(key):
     lbl_pausekey['text'] = f"Pause key: {key}"
 
@@ -221,7 +238,6 @@ def set_log_directory(event):
     else:
         lbl_settings_info['text'] = f"Invalid directory: {userinput}"
         lbl_settings_info.configure(fg="#ff0000")
-
 
 # Assign settings widget behavior
 btn_setpausekey.bind('<Button-1>', set_pausekey)

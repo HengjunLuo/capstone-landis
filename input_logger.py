@@ -28,6 +28,7 @@ paused = False
 
 log_dir = None
 
+profile = "Jonathan"
 logging_start_time = 0
 pause_time = 0
 
@@ -99,20 +100,23 @@ def set_pause_key(key):
     else:
         pause_keycode = f"Key.{key.lower()}"
 
+def set_profile(selection):
+    global profile
+    profile = selection
 
 """
 Functions defining the specific formats in which inputs are logged
 """
 def log_move(x, y):
-    log_action( mouse_logger, f"{x:04},{y:04},None,None" )
+    log_action( mouse_logger, "{0},{1},None,None".format(profile, f"{x:04},{y:04}") )
 
 def log_click(x, y, button, pressed):
     click_type = 'pressed' if pressed else 'released'
-    log_action( mouse_logger, "{0},{1},{2}".format(f"{x:04},{y:04}", str(button)[7:], click_type) )
+    log_action( mouse_logger, "{0},{1},{2},{3}".format(profile, f"{x:04},{y:04}", str(button)[7:], click_type) )
 
 def log_scroll(x, y, dx, dy):
     scroll_dir = 'down' if dy < 0 else 'up'
-    log_action( mouse_logger, "{0},scroll,{1}".format(f"{x:04},{y:04}", str(scroll_dir)) )
+    log_action( mouse_logger, "{0},{1},scroll,{2}".format(profile, f"{x:04},{y:04}", str(scroll_dir)) )
 
 def log_key_press(key):
     if str(key) == pause_keycode:
@@ -120,12 +124,12 @@ def log_key_press(key):
         else: pause()
     else:
         if key not in pressed_keys:
-            log_action( keyboard_logger, "{0},pressed".format(str(key)) )
+            log_action( keyboard_logger, "{0},{1},pressed".format(profile, str(key)) )
             pressed_keys.add(key)
 
 def log_key_release(key):
     if str(key) != pause_keycode:
-        log_action( keyboard_logger, "{0},released".format(str(key)) )
+        log_action( keyboard_logger, "{0},{1},released".format(profile, str(key)) )
         pressed_keys.remove(key)
 
 """    
