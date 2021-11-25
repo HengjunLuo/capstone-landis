@@ -21,7 +21,7 @@ class KeyboardHeatmap:
     def __init__(self, dataframe, index, seg_length=60):
         # The 49 default key bindings for team fortress 2
         self.keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
-                    "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
+                    "v","y","u","z","x","c","Key.comma",".","m","n","Key.f2","Key.f3","l","g",
                     "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
                     "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
 
