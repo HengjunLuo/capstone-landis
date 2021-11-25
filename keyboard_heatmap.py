@@ -80,7 +80,7 @@ class keyboardHeatmap:
                     "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
                     "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
                     "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
-        resultDict = {} # containing 'key':[last press time, last action, total duration, freq]
+        resultDict = {} # containing 'key':[last press time, last action, total duration, number of key strokes]
 
         #Calculate duration and freq for each key between startMin and endMin
         for index, row in dataframe.iterrows():
@@ -112,13 +112,16 @@ class keyboardHeatmap:
         segDuration = endTime - startTime
 
         #Write result to output file
-
+        classID = dataframe.iloc[0]["class"] 
         resultList = []
-        for key in resultDict:
-            totalDura = resultDict[key][2]
-            freq = 60 * resultDict[key][3]/segDuration
-            avgDura = totalDura/resultDict[key][3]
-            sublist =[key, str("{:.3f}".format(avgDura)), str("{:.3f}".format(freq)), "NaN"]
-            resultList.append(sublist)
+        for key in keyBindings:
+            if key in resultDict:
+                totalDura = resultDict[key][2]
+                freq = 60 * resultDict[key][3]/segDuration
+                avgDura = totalDura/resultDict[key][3]
+                sublist =[key, str("{:.3f}".format(avgDura)), str("{:.3f}".format(freq)), classID]
+                resultList.append(sublist)
+            else:
+                sublist = [key, "0", "0", classID]
 
         return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
