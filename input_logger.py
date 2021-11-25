@@ -195,3 +195,9 @@ def resume():
     paused = False
     logging_start_time += (time.perf_counter() - pause_time)
     
+# Get the amount of time the logger has been active for
+def elapsed_time():
+    if not paused:
+        return time.perf_counter() - logging_start_time
+    else:
+        return pause_time - logging_start_time

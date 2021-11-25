@@ -16,62 +16,6 @@ import input_logger as keylogger
 import tkinter as tk
 import pathlib
 
-# Variables editable by gui
-pausekey = "`"
-root_logdir = "./"
-started = False
-
-# Non-editable names of log files
-mouse_logdir = "mouse_actions.log"
-kb_logdir = "keyboard_actions.log"
-
-# Window settings
-_windowwidth  = 350
-_windowheight = 200
-
-# Function for saving user preferences
-def save_preferences():
-    with open('.preferences', 'w', encoding='utf-8') as f:
-            f.write("pausekey: " + pausekey + '\n')
-            f.write("root_dir: " + root_logdir)
-
-def load_preferences():
-    global pausekey, root_logdir
-    if pathlib.Path('.preferences').exists():
-        with open('.preferences', 'r', encoding='utf-8') as f:
-            data = f.readlines()
-            pausekey = data[0][10:-1]
-            root_logdir = data[1][10:]
-
-
-
-# Load user preferences
-load_preferences()
-keylogger.set_log_directory(root_logdir)
-keylogger.set_pause_key(pausekey)
-
-
-# Main window
-gui = tk.Tk()
-gui.title("Landis")
-gui.resizable(False, False)
-gui.rowconfigure(0, minsize=_windowheight/2, weight=1)
-gui.rowconfigure(1, minsize=_windowheight/2, weight=1)
-gui.columnconfigure(0, minsize=_windowwidth, weight=1)
-
-# ----- Frame widgets -----
-# Input logger status frame
-frm_status = tk.Frame(gui, width=_windowwidth)
-frm_status.rowconfigure(0, minsize=50)
-frm_status.columnconfigure(0, minsize=_windowwidth/5, weight=1)
-frm_status.columnconfigure(3, minsize=_windowwidth/5, weight=1)
-
-# Settings frame
-frm_settings = tk.Frame(gui, width=_windowwidth)
-
-# Frame positioning
-frm_status.grid(row=0, sticky="ns")
-frm_settings.grid(row=1, sticky="ns")
 
 # Profiles to choose from
 profiles = [
@@ -84,23 +28,103 @@ profiles = [
     "Other"
 ]
 
-# variable stores selected profile
+
+# Create main window
+gui = tk.Tk()
+
+# Persistent variable initial values
+pausekey = "`"
+root_logdir = "./"
 curr_profile = tk.StringVar()
-  
-# initial profile
-curr_profile.set("Jonathan")
+curr_profile.set("profile")
+
+started = False
+
+# Non-editable names of log files
+mouse_logdir = "mouse_actions.log"
+kb_logdir = "keyboard_actions.log"
+
+# Window settings
+_windowwidth  = 350
+_windowheight = 200
+
+# Save user preferences
+def save_preferences():
+    with open('.preferences', 'w', encoding='utf-8') as f:
+            f.write("pausekey: " + pausekey + '\n')
+            f.write("root_dir: " + root_logdir + '\n')
+            f.write("profile: " + curr_profile.get())
+
+# Load user preferences
+def load_preferences():
+    global pausekey, root_logdir
+    # Check that .preferences file exists
+    file = pathlib.Path('.preferences')
+    if file.exists():
+        # If any of the following operations fail, delete .preferences
+        try:
+            with open('.preferences', 'r', encoding='utf-8') as f:
+                data = f.readlines()
+                pausekey = data[0][10:-1]
+                root_logdir = data[1][10:-1]
+                curr_profile.set(data[2][9:])
+        except:
+            file.unlink() # unlink = delete
+
+
+
+# Load user preferences
+load_preferences()
+keylogger.set_log_directory(root_logdir)
+keylogger.set_pause_key(pausekey)
+keylogger.set_profile(curr_profile.get())
+
+
+# Main window
+gui.title("Landis")
+gui.resizable(False, False)
+gui.rowconfigure(0, minsize=_windowheight/2, weight=1)
+gui.rowconfigure(1, minsize=_windowheight/2, weight=1)
+gui.columnconfigure(0, minsize=_windowwidth, weight=1)
+
+# ----- Frame widgets -----
+# Input logger status frame
+frm_status = tk.Frame(gui, width=_windowwidth)
+frm_status.rowconfigure(0, minsize=50)
+frm_status.columnconfigure(0, minsize=_windowwidth/5, weight=1)
+frm_status.columnconfigure(4, minsize=_windowwidth/5, weight=1)
+
+# Settings frame
+frm_settings = tk.Frame(gui, width=_windowwidth)
+
+# Frame positioning
+frm_status.grid(row=0, sticky="ns")
+frm_settings.grid(row=1, sticky="ns")
+
 
 # ----- Status widgets -----
+# Text control variable used for showing elapsed time
+elapsed_time = tk.StringVar()
+elapsed_time.set("00m 00s")
+
+# Create widgets
 lbl_running = tk.Label(frm_status, width=25, font=("Helvetica", 12))
 btn_toggle = tk.Button(frm_status, text="Start", width=7)
 btn_stop = tk.Button(frm_status, text="Stop", state='disabled', width=7)
-btn_profile = tk.OptionMenu(frm_status, curr_profile, *profiles, command=keylogger.set_profile )
+btn_profile = tk.OptionMenu(frm_status, curr_profile, *profiles)
+lbl_loglength = tk.Label(frm_status, text="Log length:")
+lbl_time = tk.Label(frm_status, textvariable=elapsed_time, width=6, font=("Helvetica", 10))
+
+# Adjust widgets
+btn_profile.config(width=8)
 
 # Status widgets positioning
 lbl_running.grid(row=0, column=1, columnspan=3)
 btn_toggle.grid(row=1, column=1, padx=5)
 btn_stop.grid(row=1, column=2, padx=5)
 btn_profile.grid(row=1, column=3)
+lbl_loglength.grid(row=2, column=2)
+lbl_time.grid(row=2, column=3, pady=8)
 
 # Status widget behavior
 def update_lbl_status(status):
@@ -131,6 +155,10 @@ def stop_keylogger(event):
     btn_stop['state'] = 'disabled'
     update_lbl_status("Stopped")
 
+def set_profile(var, ix, op):
+    keylogger.set_profile(curr_profile.get())
+    save_preferences()
+
 def check_status():
     if keylogger.running == False:
         btn_toggle['text'] = "Start"
@@ -143,14 +171,18 @@ def check_status():
         else:
             update_lbl_status("Running")
             btn_toggle['text'] = "Pause"
+    
+    minutes, seconds = divmod(keylogger.elapsed_time(), 60)
+    elapsed_time.set(f"{minutes:02.0f}m {seconds:02.0f}s")
 
     if keylogger.running:
-        gui.after(1000, check_status) # Run this function every second
+        gui.after(100, check_status) # Run this function every 0.1s
 
 
 # Assign settings widget behavior
 btn_toggle.bind('<Button-1>', toggle_status)
 btn_stop.bind('<Button-1>', stop_keylogger)
+curr_profile.trace('w', set_profile)
 
 # Fill text fields with initial values
 update_lbl_status("Not started")
