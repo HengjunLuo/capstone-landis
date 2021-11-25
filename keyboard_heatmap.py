@@ -2,64 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-#Keyboard log parser
-class keyboardLogParser:
-    @staticmethod
-    def parseKeyboardLog(inputPath, outputPath, startMin, endMin):
-        # The 49 default key bindings for team fortress 2
-        keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
-                    "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
-                    "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
-                    "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
-        #starMin and endMin must >= 0
-        resultDict = {} # containing 'key':[last press time, last action, total duration, freq]
-        start = float(startMin * 60)
-        end = float(endMin * 60)
-
-        # ReadFile
-        file1 = open(inputPath, 'r')
-        lines = file1.readlines()
-        #Calculate duration and freq for each key between startMin and endMin
-        for line in lines:
-            line = line.replace("'", "")
-            line = line.strip()
-            words = line.split(",")
-            time = float(words[0])
-            key = words[1]
-            if key in keyBindings:
-                time = float(words[0])
-                if time <= end:
-                    if time >= start:
-                        action = words[2]
-                        if key in resultDict:
-                            if resultDict[key][1] == "pressed":
-                                if action == "released":
-                                    newDura = time - resultDict[key][0]
-                                    resultDict[key][2] += newDura
-                                    resultDict[key][1] = action
-                                    resultDict[key][3] += 1
-                            else:
-                                    if action == "pressed":
-                                        resultDict[key][0] = time
-                                        resultDict[key][1] = action
-                        else:
-                            if action == "pressed":
-                                resultDict[key] = [time,action,0,0]
-                else:
-                    break
-
-        #Write result to output file
-        file2 = open(outputPath,'w')
-
-        for key in resultDict:
-            totalDura = resultDict[key][2]
-            freq = resultDict[key][3]
-            avgDura = totalDura/freq
-            output = key +" "+ str("{:.5f}".format(avgDura)) +" "+ str(freq)
-            print(output, file=file2)
-
 class keyboardHeatmap:
-    def __init__(self, keyboard_df, maxF, maxD):
+    maxFreq = 0.0
+    maxDura = 0.0
+    def __init__(self, dataframe):
+        self.keyboard_df = keyboardHeatmap.parseKeyboardLog(dataframe)
         # The 49 default key bindings for team fortress 2
         self.keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
                     "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
@@ -67,12 +14,11 @@ class keyboardHeatmap:
                     "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
         keyFreqDict ={}
         keyDuraDict = {}
-        self.maxFreq = maxF
-        self.maxDura = maxD
+
         for key in self.keyBindings:
             keyFreqDict[key] = 0
             keyDuraDict[key] = 0
-        theKeyboardDict = keyboard_df.to_dict('records')
+        theKeyboardDict = self.keyboard_df.to_dict('records')
         for item in theKeyboardDict:
             keyFreqDict[item['key']] = item['freq']
             keyDuraDict[item['key']] = item['avg_duration']
@@ -80,11 +26,11 @@ class keyboardHeatmap:
         self.keyDuraList = []
         for item in self.keyBindings:
             if item in keyFreqDict:
-                self.keyFreqList.append(keyFreqDict[item])
+                self.keyFreqList.append(float(keyFreqDict[item]))
             else:
                 self.keyFreqList.append(0)
             if item in keyDuraDict:
-                self.keyDuraList.append(keyDuraDict[item])
+                self.keyDuraList.append(float(keyDuraDict[item]))
             else:
                 self.keyDuraList.append(0)
         self.arrFreq = np.array([self.keyFreqList])
@@ -95,8 +41,8 @@ class keyboardHeatmap:
         # Setting up the heatmap
         fig, axes = plt.subplots( nrows=2)
         ax1,ax2 = axes
-        im1 = ax1.imshow(heatmap.arrFreq, cmap='cividis', vmax=heatmap.maxFreq)
-        im2 = ax2.imshow(heatmap.arrDura, cmap='cividis', vmax=heatmap.maxDura)
+        im1 = ax1.imshow(heatmap.arrFreq, cmap='cividis', vmax=keyboardHeatmap.maxFreq)
+        im2 = ax2.imshow(heatmap.arrDura, cmap='cividis', vmax=keyboardHeatmap.maxDura)
 
         
         plt.subplots_adjust(top=0.1, bottom=0)
@@ -125,3 +71,54 @@ class keyboardHeatmap:
 
         # Show heatmaps for frequency and average duartion pressed for keys
         plt.show()
+
+
+    @staticmethod
+    def parseKeyboardLog(dataframe):
+        # The 49 default key bindings for team fortress 2
+        keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
+                    "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
+                    "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
+                    "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
+        resultDict = {} # containing 'key':[last press time, last action, total duration, freq]
+
+        #Calculate duration and freq for each key between startMin and endMin
+        for index, row in dataframe.iterrows():
+            key = row['key'][1]
+            if key in keyBindings:
+                time = float(row['time'])
+                action = row['action']
+                if key in resultDict:
+                    if resultDict[key][1] == "pressed":
+                        if action == "released":
+                            newDura = time - resultDict[key][0]
+                            resultDict[key][2] += newDura
+                            resultDict[key][1] = action
+                            resultDict[key][3] += 1
+                    else:
+                            if action == "pressed":
+                                resultDict[key][0] = time
+                                resultDict[key][1] = action
+                else:
+                    if action == "pressed":
+                        resultDict[key] = [time,action,0,0]
+        
+
+        #Calculating the actual segment duration in seconds by subtracting the time of first key press from the time of last key release
+        firstPress = dataframe.query('action.eq("pressed")').index.min()
+        startTime = float(dataframe.iloc[firstPress]['time'])
+        lastRelease = dataframe.query('action.eq("released")').index.max()
+        endTime = float(dataframe.iloc[lastRelease]['time'])
+        segDuration = endTime - startTime
+
+        #Write result to output file
+
+        resultList = []
+        for key in resultDict:
+            totalDura = resultDict[key][2]
+            freq = 60 * resultDict[key][3]/segDuration
+            avgDura = totalDura/resultDict[key][3]
+            sublist =[key, str("{:.3f}".format(avgDura)), str("{:.3f}".format(freq)), "NaN"]
+            resultList.append(sublist)
+
+        return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
