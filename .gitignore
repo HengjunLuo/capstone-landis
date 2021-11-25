@@ -1,6 +1,4 @@
 ﻿/.vs
-/*.log
-logs/
 .ipynb_checkpoints
 .preferences
 __pycache__
