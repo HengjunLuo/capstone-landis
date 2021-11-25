@@ -2,67 +2,112 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-class keyboardHeatmap:
-    maxFreq = 0.0
-    maxDura = 0.0
-    def __init__(self, dataframe):
-        self.keyboard_df = keyboardHeatmap.parseKeyboardLog(dataframe)
+from log_parser import extract_keyboard_features
+
+
+"""
+KeyboardHeatmap class takes a segment from a parsed file generated from a 
+keyboard_actions log file and provides methods to display it as a heatmap 
+showing each keys frequency and duration during the specified segment
+"""
+class KeyboardHeatmap:
+
+    """
+    Construct the heatmap object by passing it a pandas dataframe
+    The dataframe must be generated from a keyboard_actions log file
+    index: The index of the segment
+    seg_length: The length of the segment (default 60)
+    """
+    def __init__(self, dataframe, index, seg_length=60):
         # The 49 default key bindings for team fortress 2
         self.keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
                     "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
                     "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
                     "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
-        keyFreqDict ={}
-        keyDuraDict = {}
 
+        # Extract frequency and duration data from segment
+        self.keyboard_df = extract_keyboard_features(dataframe, index, seg_length)
+
+        self.class_label_ = "Null"
+        # Check that data is not empty
+        if len(self.keyboard_df.index) > 0:
+            # Infer class_label from first line of data
+            self.class_label_ = self.keyboard_df['class'].iloc[0]
+
+        # Set key column to index (unique values)
+        self.keyboard_df.set_index('key', inplace=True)
+
+        # Create np arrays initialized with 0s the same shape as the keybindings list
+        self.arrFreq = np.zeros_like(self.keyBindings, dtype=float)
+        self.arrDura = np.zeros_like(self.keyBindings, dtype=float)
+
+        # For each entry in the DataFrame, insert data into arrays
         for key in self.keyBindings:
-            keyFreqDict[key] = 0
-            keyDuraDict[key] = 0
-        theKeyboardDict = self.keyboard_df.to_dict('records')
-        for item in theKeyboardDict:
-            keyFreqDict[item['key']] = item['freq']
-            keyDuraDict[item['key']] = item['avg_duration']
-        self.keyFreqList = []
-        self.keyDuraList = []
-        for item in self.keyBindings:
-            if item in keyFreqDict:
-                self.keyFreqList.append(float(keyFreqDict[item]))
-            else:
-                self.keyFreqList.append(0)
-            if item in keyDuraDict:
-                self.keyDuraList.append(float(keyDuraDict[item]))
-            else:
-                self.keyDuraList.append(0)
-        self.arrFreq = np.array([self.keyFreqList])
-        self.arrDura = np.array([self.keyDuraList])
+            if key in self.keyboard_df.index:
+                self.arrFreq[self.keyBindings.index(key)] = self.keyboard_df.freq[key]
+                self.arrDura[self.keyBindings.index(key)] = self.keyboard_df.avg_duration[key]
 
-    @staticmethod
-    def show_heatmap(heatmap):
-        # Setting up the heatmap
+
+    """
+    Display the heatmap of specified segment
+    """
+    def show_heatmap(self):
+
+        a1 = self.arrFreq.reshape((7, 7))
+        a2 = self.arrDura.reshape((7, 7))
+        a3 = np.append(a1, a2, axis=1)
+
+        plt.figure(figsize=(8, 4))
+        plt.imshow(a3, cmap='cividis')
+        plt.tick_params(which='both', bottom=False, labelbottom=False, left=False, labelleft=False)
+        plt.show()
+
+    """
+    Return the heatmap as a numpy array for feature input
+    """
+    def heatmap_data(self):
+        a1 = self.arrFreq.reshape((7, 7))
+        a2 = self.arrDura.reshape((7, 7))
+        return np.append(a1, a2, axis=1)
+    
+    """
+    Return the class that the heatmap data belongs to
+    """
+    def class_label(self):
+        return self.class_label_
+
+    """
+    Display the data as an infographic
+    """
+    def show_infographic(self):
+        # Setting up the heatmaps
         fig, axes = plt.subplots( nrows=2)
         ax1,ax2 = axes
-        im1 = ax1.imshow(heatmap.arrFreq, cmap='cividis', vmax=keyboardHeatmap.maxFreq)
-        im2 = ax2.imshow(heatmap.arrDura, cmap='cividis', vmax=keyboardHeatmap.maxDura)
-
-        
         plt.subplots_adjust(top=0.1, bottom=0)
+        
+        # Show heatmaps
+        ax1.imshow([self.arrFreq], cmap='cividis')
+        ax2.imshow([self.arrDura], cmap='cividis')
 
-
-        ax1.set_xticks(np.arange(len(heatmap.keyBindings)))
+        # Set ticks and labels
+        ax1.set_xticks(np.arange(len(self.keyBindings)))
+        ax1.set_xticklabels(self.keyBindings)
         ax1.set_yticks(np.arange(len(['Frequency'])))
-        ax2.set_xticks(np.arange(len(heatmap.keyBindings)))
-        ax2.set_yticks(np.arange(len(['Average Duraion'])))
-
-        ax1.set_xticklabels(heatmap.keyBindings)
         ax1.set_yticklabels(['Frequency'])
-        ax2.set_xticklabels(heatmap.keyBindings)
+
+        ax2.set_xticks(np.arange(len(self.keyBindings)))
+        ax2.set_xticklabels(self.keyBindings)
+        ax2.set_yticks(np.arange(len(['Average Duraion'])))
         ax2.set_yticklabels(['Average Duraion'])
+        
         # Rotate the tick labels and set their alignment.
-        plt.setp(ax1.get_xticklabels(), rotation=20, ha="right")
-        plt.setp(ax2.get_xticklabels(), rotation=20, ha="right")
-        for i in range(len(heatmap.keyBindings)):
-            text = ax1.text(i,0, heatmap.keyFreqList[i], ha='center')
-            text = ax2.text(i,0, heatmap.keyDuraList[i], ha='center')
+        plt.setp(ax1.get_xticklabels(), rotation=-30, ha="right")
+        plt.setp(ax2.get_xticklabels(), rotation=-30, ha="right")
+
+        for i in range(len(self.keyBindings)):
+            ax1.text(i, 0, self.arrFreq[i], ha='center')
+            ax2.text(i, 0, self.arrDura[i], ha='center')
+            
         ax1.set_title("Frequency")
         ax2.set_title("Average Duration")
         fig.set_size_inches(40,30)
@@ -71,67 +116,3 @@ class keyboardHeatmap:
 
         # Show heatmaps for frequency and average duartion pressed for keys
         plt.show()
-
-
-    @staticmethod
-    def parseKeyboardLog(dataframe):
-        # The 49 default key bindings for team fortress 2
-        keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
-                    "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
-                    "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
-                    "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
-        resultDict = {} # containing 'key':[last press time, last action, total duration, number of key strokes]
-
-        #Calculate duration and freq for each key between startMin and endMin
-        for index, row in dataframe.iterrows():
-            if row['key'][0] == "'":
-                key = row['key'][1:-1]
-            else:
-                key = row['key']
-            if key in keyBindings:
-                time = float(row['time'])
-                action = row['action']
-                if key in resultDict:
-                    if resultDict[key][1] == "pressed":
-                        if action == "released":
-                            newDura = time - resultDict[key][0]
-                            resultDict[key][2] += newDura
-                            resultDict[key][1] = action
-                            resultDict[key][3] += 1
-                    else:
-                            if action == "pressed":
-                                resultDict[key][0] = time
-                                resultDict[key][1] = action
-                else:
-                    if action == "pressed":
-                        resultDict[key] = [time,action,0,0]
-
-
-        classID = "NaN"
-        if resultDict :
-            #Calculating the actual segment duration in seconds by subtracting the time of first key press from the time of last key release
-            startIndex = dataframe.index.min()
-            firstPress = dataframe.query('action.eq("pressed")').index.min() - startIndex
-            startTime = float(dataframe.iloc[firstPress]['time'])
-            lastRelease = dataframe.query('action.eq("released")').index.max() - startIndex
-            endTime = float(dataframe.iloc[lastRelease]['time'])
-            segDuration = endTime - startTime
-            classID = dataframe.iloc[0]["class"] 
-
-        #Write result to output file
-
-        resultList = []
-        for key in keyBindings:
-            if key in resultDict:
-                totalDura = resultDict[key][2]
-                freq = 60 * resultDict[key][3]/segDuration
-                if resultDict[key][3] !=0:
-                    avgDura = totalDura/resultDict[key][3]
-                else:
-                    avgDura = 0
-                sublist =[key, str("{:.3f}".format(avgDura)), str("{:.3f}".format(freq)), classID]
-                resultList.append(sublist)
-            else:
-                sublist = [key, "0", "0", classID]
-
-        return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
