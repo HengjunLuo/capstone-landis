@@ -1,22 +1,31 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from log_parser import get_segment
+
 """
-MouseHeatmap class takes a segment of a dataframe generated from a
-mouse_actions log file and provides methods to display it as a heatmap
-showing the relative amount of time the mouse cursor spent in each location 
-on the screen
+MouseHeatmap class takes a segment from a parsed file generated from a 
+mouse_actions log file and provides methods to display it as a heatmap showing
+the relative amount of time the mouse cursor spent in each location on the
+screen during the specified segment
 """
 class MouseHeatmap:
 
     """
     Construct the heatmap object by passing it a pandas dataframe
     The dataframe must be generated from a mouse_actions log file
-    You can obtain a specified slice of time from the dataframe using get_segment()
+    index: The index of the segment
+    seg_length: The length of the segment (default 60)
     """
-    def __init__(self, df_segment):
+    def __init__(self, dataframe, index, seg_length):
         # Copy DataFrame as instance attribute
-        self.df = df_segment
+        self.df = get_segment(dataframe, index, seg_length)
+
+        self.class_label_ = "Null"
+        # Check that data is not empty
+        if len(self.df.index) > 0:
+            # Infer class_label from first line of data
+            self.class_label_ = self.df['class'].iloc[0]
 
         # Initialize values used for building heatmap image
         self.last_time, self.last_x, self.last_y = 0, 0, 0
@@ -93,7 +102,13 @@ class MouseHeatmap:
 
 
     """
-    Display the heatmap
+    Return the class that the heatmap data belongs to
+    """
+    def class_label(self):
+        return self.class_label_
+
+    """
+    Display the heatmap of specified segment
     res: The resolution of the heatmap image
     """
     def show_heatmap(self, res=(100, 100)):

@@ -5,7 +5,7 @@ import pandas as pd
 """
 Basic parsing of keyboard log files
 
-filepath: The name of the logfile
+filepath: The path/name of the logfile
 returns: Pandas DataFrame
 """
 def parse_keyboard_log(filepath):
@@ -15,7 +15,7 @@ def parse_keyboard_log(filepath):
 """
 Basic parsing of mouse log files
 
-filepath: The name of the logfile
+filepath: The path/name of the logfile
 returns: Pandas DataFrame
 """
 def parse_mouse_log(filepath):
@@ -34,7 +34,7 @@ returns: Pandas DataFrame
 """
 def get_segment(parsedFile, index, seg_length=60):
     # Calculate first and last second of segment
-    last_sec = index * seg_length
+    last_sec = (index + 1) * seg_length
     first_sec = last_sec - seg_length
 
     # Create a mask for the specified time range
@@ -45,18 +45,25 @@ def get_segment(parsedFile, index, seg_length=60):
 
 
 """
-Extract useful keyboard features from a parsed logfile, like average 
-keypress duration and frequency
+Extract useful keyboard features from a logfile, such as average keypress 
+duration and frequency
 
 parsedFile: The result of a parse_keyboard_log() call
+index: The index of the segment
+seg_length: The length of the segment (default 60)
 returns: Pandas DataFrame
+
+*Note* Segment length determines index, i.e. "The 5th 15-second segment"
 """
-def extract_keyboard_features(parsedFile):
+def extract_keyboard_features(parsedFile, index, seg_length=60):
     # The 49 default key bindings for team fortress 2
     keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
                 "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
                 "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
                 "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
+
+    # Parse the file and get specified segment
+    parsedFile = get_segment(parsedFile, index, seg_length)
 
     resultDict = {} # containing 'key':[last press time, last action, total duration, number of key strokes]
 
@@ -95,13 +102,10 @@ def extract_keyboard_features(parsedFile):
                     resultDict[key] = [time, action, 0, 0]
 
 
-    # Default values if log is empty
-    classID = "NaN"
-    seg_length = 0
+    # Default value if log is empty
+    classID = "Null"
 
     if len(parsedFile.index) > 0: # If the dataframe isnt empty
-        # Calculate segment duration
-        seg_length = parsedFile.time.max() - parsedFile.time.min()
         # Infer class label from first line
         classID = parsedFile.iloc[0]["class"] 
 

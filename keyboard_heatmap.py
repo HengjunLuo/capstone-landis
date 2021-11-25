@@ -2,12 +2,23 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import log_parser
+from log_parser import extract_keyboard_features
 
+
+"""
+KeyboardHeatmap class takes a segment from a parsed file generated from a 
+keyboard_actions log file and provides methods to display it as a heatmap 
+showing each keys frequency and duration during the specified segment
+"""
 class KeyboardHeatmap:
 
-    def __init__(self, dataframe):
-
+    """
+    Construct the heatmap object by passing it a pandas dataframe
+    The dataframe must be generated from a keyboard_actions log file
+    index: The index of the segment
+    seg_length: The length of the segment (default 60)
+    """
+    def __init__(self, dataframe, index, seg_length=60):
         # The 49 default key bindings for team fortress 2
         self.keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
                     "v","y","u","z","x","c",",",".","m","n","Key.f2","Key.f3","l","g",
@@ -15,7 +26,14 @@ class KeyboardHeatmap:
                     "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
 
         # Extract frequency and duration data from segment
-        self.keyboard_df = log_parser.extract_keyboard_features(dataframe)
+        self.keyboard_df = extract_keyboard_features(dataframe, index, seg_length)
+
+        self.class_label_ = "Null"
+        # Check that data is not empty
+        if len(self.keyboard_df.index) > 0:
+            # Infer class_label from first line of data
+            self.class_label_ = self.keyboard_df['class'].iloc[0]
+            print(f"index: {index}\n{self.keyboard_df.iloc[0]}\n")
 
         # Set key column to index (unique values)
         self.keyboard_df.set_index('key', inplace=True)
@@ -31,8 +49,39 @@ class KeyboardHeatmap:
                 self.arrDura[self.keyBindings.index(key)] = self.keyboard_df.avg_duration[key]
 
 
+    """
+    Display the heatmap of specified segment
+    """
     def show_heatmap(self):
-        # Setting up the heatmap
+
+        a1 = self.arrFreq.reshape((7, 7))
+        a2 = self.arrDura.reshape((7, 7))
+        a3 = np.append(a1, a2, axis=1)
+
+        plt.figure(figsize=(8, 4))
+        plt.imshow(a3, cmap='cividis')
+        plt.tick_params(which='both', bottom=False, labelbottom=False, left=False, labelleft=False)
+        plt.show()
+
+    """
+    Return the heatmap as a numpy array for feature input
+    """
+    def heatmap_data(self):
+        a1 = self.arrFreq.reshape((7, 7))
+        a2 = self.arrDura.reshape((7, 7))
+        return np.append(a1, a2, axis=1)
+    
+    """
+    Return the class that the heatmap data belongs to
+    """
+    def class_label(self):
+        return self.class_label_
+
+    """
+    Display the data as an infographic
+    """
+    def show_infographic(self):
+        # Setting up the heatmaps
         fig, axes = plt.subplots( nrows=2)
         ax1,ax2 = axes
         plt.subplots_adjust(top=0.1, bottom=0)
