@@ -4,6 +4,7 @@ import log_parser
 import numpy as np
 import pandas as pd
 import math
+from sklearn import tree
 
 # 10 second time segments
 segment_time = 10
