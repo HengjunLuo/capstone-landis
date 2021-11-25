@@ -112,10 +112,8 @@ class keyboardHeatmap:
             #Calculating the actual segment duration in seconds by subtracting the time of first key press from the time of last key release
             startIndex = dataframe.index.min()
             firstPress = dataframe.query('action.eq("pressed")').index.min() - startIndex
-            print("P ",firstPress + startIndex)
             startTime = float(dataframe.iloc[firstPress]['time'])
             lastRelease = dataframe.query('action.eq("released")').index.max() - startIndex
-            print("R ",lastRelease + startIndex)
             endTime = float(dataframe.iloc[lastRelease]['time'])
             segDuration = endTime - startTime
             classID = dataframe.iloc[0]["class"] 
