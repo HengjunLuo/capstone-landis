@@ -123,20 +123,30 @@ def log_key_press(key):
         if paused: resume()
         else: pause()
     else:
+        # Special case: comma key (since logfile is commma separated)
+        str_key = str(key)
+        if str_key == "','":
+            str_key = 'Key.comma'
+
         if key not in pressed_keys:
-            log_action( keyboard_logger, "{0},pressed,{1}".format(str(key), profile) )
+            log_action( keyboard_logger, "{0},pressed,{1}".format(str_key, profile) )
             pressed_keys.add(key)
 
 def log_key_release(key):
     if str(key) != pause_keycode:
-        log_action( keyboard_logger, "{0},released,{1}".format(str(key), profile) )
+        # Special case: comma key (since logfile is commma separated)
+        str_key = str(key)
+        if str_key == "','":
+            str_key = 'Key.comma'
+            
+        log_action( keyboard_logger, "{0},released,{1}".format(str_key, profile) )
         pressed_keys.remove(key)
 
 """    
 Intermediary logging function
 Make the script more readable and less error-prone
 """
-def log_action( logger, message):
+def log_action(logger, message):
     if not paused:
         logger.info(message, 
             extra={'elapsed_time': time.perf_counter() - logging_start_time})
