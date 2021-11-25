@@ -30,7 +30,7 @@ def get_segment(parsedFile, index, seg_length=60):
     first_sec = last_sec - seg_length
 
     # Create a mask for the specified time range
-    mask = (parsedFile.time > first_sec) & (parsedFile.time < last_sec)
+    mask = (parsedFile.time >= first_sec) & (parsedFile.time < last_sec)
 
     # Return slice of dataframe within specified time frame
     return parsedFile[mask]

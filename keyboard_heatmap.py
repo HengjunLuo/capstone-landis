@@ -84,7 +84,10 @@ class keyboardHeatmap:
 
         #Calculate duration and freq for each key between startMin and endMin
         for index, row in dataframe.iterrows():
-            key = row['key'][1]
+            if row['key'][0] == "'":
+                key = row['key'][1:-1]
+            else:
+                key = row['key']
             if key in keyBindings:
                 time = float(row['time'])
                 action = row['action']
@@ -102,23 +105,32 @@ class keyboardHeatmap:
                 else:
                     if action == "pressed":
                         resultDict[key] = [time,action,0,0]
-        
 
-        #Calculating the actual segment duration in seconds by subtracting the time of first key press from the time of last key release
-        firstPress = dataframe.query('action.eq("pressed")').index.min()
-        startTime = float(dataframe.iloc[firstPress]['time'])
-        lastRelease = dataframe.query('action.eq("released")').index.max()
-        endTime = float(dataframe.iloc[lastRelease]['time'])
-        segDuration = endTime - startTime
+
+        classID = "NaN"
+        if resultDict :
+            #Calculating the actual segment duration in seconds by subtracting the time of first key press from the time of last key release
+            startIndex = dataframe.index.min()
+            firstPress = dataframe.query('action.eq("pressed")').index.min() - startIndex
+            print("P ",firstPress + startIndex)
+            startTime = float(dataframe.iloc[firstPress]['time'])
+            lastRelease = dataframe.query('action.eq("released")').index.max() - startIndex
+            print("R ",lastRelease + startIndex)
+            endTime = float(dataframe.iloc[lastRelease]['time'])
+            segDuration = endTime - startTime
+            classID = dataframe.iloc[0]["class"] 
 
         #Write result to output file
-        classID = dataframe.iloc[0]["class"] 
+
         resultList = []
         for key in keyBindings:
             if key in resultDict:
                 totalDura = resultDict[key][2]
                 freq = 60 * resultDict[key][3]/segDuration
-                avgDura = totalDura/resultDict[key][3]
+                if resultDict[key][3] !=0:
+                    avgDura = totalDura/resultDict[key][3]
+                else:
+                    avgDura = 0
                 sublist =[key, str("{:.3f}".format(avgDura)), str("{:.3f}".format(freq)), classID]
                 resultList.append(sublist)
             else:
