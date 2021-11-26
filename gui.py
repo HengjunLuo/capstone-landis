@@ -60,14 +60,14 @@ kb_logdir = "keyboard_actions.log"
 
 # Window settings
 _windowwidth  = 350
-_windowheight = 200
+_windowheight = 250
 
 # Save user preferences
 def save_preferences():
     with open('.preferences', 'w', encoding='utf-8') as f:
             f.write("pausekey: " + pausekey + '\n')
             f.write("root_dir: " + root_logdir + '\n')
-            f.write("profile: " + curr_profile.get())
+            f.write("profile: " + curr_profile.get() + '\n')
             f.write("character: " + curr_character.get())
 
 # Load user preferences
@@ -80,9 +80,13 @@ def load_preferences():
         try:
             with open('.preferences', 'r', encoding='utf-8') as f:
                 data = f.readlines()
+                # First line, extract from 10th character to the newline
                 pausekey = data[0][10:-1]
+                # Second line, extract from 10th character to the newline
                 root_logdir = data[1][10:-1]
-                curr_profile.set(data[2][9:])
+                # Third line, extract from 9th character to the newline
+                curr_profile.set(data[2][9:-1])
+                # Fourth line, extract from 11th character to the end
                 curr_character.set(data[3][11:])
         except:
             file.unlink() # unlink = delete
@@ -135,15 +139,16 @@ lbl_time = tk.Label(frm_status, textvariable=elapsed_time, width=6, font=("Helve
 
 # Adjust widgets
 btn_profile.config(width=8)
+btn_character.config(width=8)
 
 # Status widgets positioning
 lbl_running.grid(row=0, column=1, columnspan=3)
-btn_toggle.grid(row=1, column=1, padx=5)
-btn_stop.grid(row=1, column=2, padx=5)
-btn_profile.grid(row=1, column=3)
-btn_character.grid(row=1, column=4)
-lbl_loglength.grid(row=2, column=2)
-lbl_time.grid(row=2, column=3, pady=8)
+btn_toggle.grid(row=1, column=1, padx=5, sticky='e')
+btn_stop.grid(row=1, column=2, padx=5, sticky='w')
+btn_profile.grid(row=2, column=1, padx=5, sticky='e')
+btn_character.grid(row=2, column=2, padx=5, sticky='w')
+lbl_loglength.grid(row=3, column=1, sticky='e')
+lbl_time.grid(row=3, column=2, pady=8, sticky='w')
 
 # Status widget behavior
 def update_lbl_status(status):
