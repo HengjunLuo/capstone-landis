@@ -19,13 +19,25 @@ import pathlib
 
 # Profiles to choose from
 profiles = [
-    "Jonathan",
-    "Marco",
-    "Zirui",
-    "Joseph",
-    "Hengjun",
-    "Mitchell",
-    "Other"
+    "JON",
+    "MAR",
+    "ZIR",
+    "JOS",
+    "HEN",
+    "MIT",
+    "OTH"
+]
+
+characters = [
+    "SCO",
+    "SOL",
+    "PYR",
+    "DEM",
+    "HEA",
+    "ENG",
+    "MED",
+    "SNI",
+    "SPY"
 ]
 
 
@@ -37,6 +49,8 @@ pausekey = "`"
 root_logdir = "./"
 curr_profile = tk.StringVar()
 curr_profile.set("profile")
+curr_character = tk.StringVar()
+curr_character.set("character")
 
 started = False
 
@@ -54,6 +68,7 @@ def save_preferences():
             f.write("pausekey: " + pausekey + '\n')
             f.write("root_dir: " + root_logdir + '\n')
             f.write("profile: " + curr_profile.get())
+            f.write("character: " + curr_character.get())
 
 # Load user preferences
 def load_preferences():
@@ -68,6 +83,7 @@ def load_preferences():
                 pausekey = data[0][10:-1]
                 root_logdir = data[1][10:-1]
                 curr_profile.set(data[2][9:])
+                curr_character.set(data[3][11:])
         except:
             file.unlink() # unlink = delete
 
@@ -78,6 +94,7 @@ load_preferences()
 keylogger.set_log_directory(root_logdir)
 keylogger.set_pause_key(pausekey)
 keylogger.set_profile(curr_profile.get())
+keylogger.set_character(curr_character.get())
 
 
 # Main window
@@ -112,6 +129,7 @@ lbl_running = tk.Label(frm_status, width=25, font=("Helvetica", 12))
 btn_toggle = tk.Button(frm_status, text="Start", width=7)
 btn_stop = tk.Button(frm_status, text="Stop", state='disabled', width=7)
 btn_profile = tk.OptionMenu(frm_status, curr_profile, *profiles)
+btn_character = tk.OptionMenu(frm_status, curr_character, *characters)
 lbl_loglength = tk.Label(frm_status, text="Log length:")
 lbl_time = tk.Label(frm_status, textvariable=elapsed_time, width=6, font=("Helvetica", 10))
 
@@ -123,6 +141,7 @@ lbl_running.grid(row=0, column=1, columnspan=3)
 btn_toggle.grid(row=1, column=1, padx=5)
 btn_stop.grid(row=1, column=2, padx=5)
 btn_profile.grid(row=1, column=3)
+btn_character.grid(row=1, column=4)
 lbl_loglength.grid(row=2, column=2)
 lbl_time.grid(row=2, column=3, pady=8)
 
@@ -159,6 +178,10 @@ def set_profile(var, ix, op):
     keylogger.set_profile(curr_profile.get())
     save_preferences()
 
+def set_character(var, ix, op):
+    keylogger.set_character(curr_character.get())
+    save_preferences()
+
 def check_status():
     if keylogger.running == False:
         btn_toggle['text'] = "Start"
@@ -183,6 +206,7 @@ def check_status():
 btn_toggle.bind('<Button-1>', toggle_status)
 btn_stop.bind('<Button-1>', stop_keylogger)
 curr_profile.trace('w', set_profile)
+curr_character.trace('w', set_character)
 
 # Fill text fields with initial values
 update_lbl_status("Not started")
