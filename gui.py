@@ -68,11 +68,23 @@ def save_preferences():
             f.write("character: " + curr_character.get())
 
 # Save logfile path to routing file
-# DOES NOT CHECK IF IDENTICAL ENTRY ALREADY EXISTS SHOULD PROBABLY DO THIS
 def update_routing_table():
+
+    # Copy logfile paths into convenient variables
+    keylog_dir = lbl_keylog_dir['text'] + '\n'
+    mouselog_dir = lbl_mouselog_dir['text'] + '\n'
+    
+    # Read all lines from routing file and check for matches
+    with open('.routing', 'r', encoding='utf-8') as f:
+                entries = f.readlines()
+                for entry in entries:
+                    if entry == keylog_dir or entry == mouselog_dir:
+                        return
+    
+    # Write logfile paths to routing file
     with open('.routing', 'a', encoding='utf-8') as f:
-            f.write(lbl_mouselog_dir['text'] + '\n')
-            f.write(lbl_keylog_dir['text'] + '\n')
+            f.write(mouselog_dir)
+            f.write(keylog_dir)
 
 # Load user preferences
 def load_preferences():
