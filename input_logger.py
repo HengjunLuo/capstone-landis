@@ -145,7 +145,7 @@ def log_key_release(key):
             str_key = 'Key.comma'
             
         log_action( keyboard_logger, "{0},released,{1}".format(str_key, profile + character) )
-        pressed_keys.remove(key)
+        pressed_keys.discard(key)
 
 """    
 Intermediary logging function
