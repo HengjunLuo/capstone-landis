@@ -15,7 +15,6 @@ import logging
 import re
 import random
 
-
 # Escape key code
 # A widely used option is the grave key
 # Alt+` " ` " is also the button for " ~ ". Should be the button above tab
@@ -68,7 +67,6 @@ def setup_logger(name, log_filename):
     
     return logger
 
-
 # Initialize loggers and create logging files
 def create_loggers():
     global mouse_logger, keyboard_logger, logname
@@ -84,7 +82,6 @@ def create_loggers():
     # Create keyboard logger and increment name
     keyboard_logger = setup_logger(str(logname), keylog_dir)
     logname += 1 # Ensure unique names
-
 
 # Change directory where logs are saved
 def set_mouselog_directory(dir):
@@ -176,11 +173,9 @@ def log_action(logger, message):
         logger.info(message, 
             extra={'elapsed_time': time.perf_counter() - logging_start_time})
 
-
 # Declare listeners
 mouse_listener = None
 keyboard_listener = None
-
 
 # "Start" threads (more importantly start the counter)
 def start():
