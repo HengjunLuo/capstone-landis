@@ -69,9 +69,8 @@ def save_preferences():
 
 # Save logfile path to routing file
 # DOES NOT CHECK IF IDENTICAL ENTRY ALREADY EXISTS SHOULD PROBABLY DO THIS
-# ALSO MAYBE DELETES ALL PREVIOUS ENTRIES??
 def update_routing_table():
-    with open('.routing', 'w', encoding='utf-8') as f:
+    with open('.routing', 'a', encoding='utf-8') as f:
             f.write(lbl_mouselog_dir['text'] + '\n')
             f.write(lbl_keylog_dir['text'] + '\n')
 
