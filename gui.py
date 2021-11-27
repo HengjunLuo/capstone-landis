@@ -46,7 +46,8 @@ gui = tk.Tk()
 
 # Persistent variable initial values
 pausekey = "`"
-root_logdir = "./"
+keylog_dir = "./keyboard_actions.log"
+mouselog_dir = "./mouse_actions.log"
 curr_profile = tk.StringVar()
 curr_profile.set("profile")
 curr_character = tk.StringVar()
@@ -54,25 +55,22 @@ curr_character.set("character")
 
 started = False
 
-# Non-editable names of log files
-mouse_logdir = "mouse_actions.log"
-kb_logdir = "keyboard_actions.log"
-
 # Window settings
-_windowwidth  = 350
+_windowwidth  = 375
 _windowheight = 250
 
 # Save user preferences
 def save_preferences():
     with open('.preferences', 'w', encoding='utf-8') as f:
             f.write("pausekey: " + pausekey + '\n')
-            f.write("root_dir: " + root_logdir + '\n')
+            f.write("keylog_dir: " + keylog_dir + '\n')
+            f.write("mouselog_dir: " + mouselog_dir + '\n')
             f.write("profile: " + curr_profile.get() + '\n')
             f.write("character: " + curr_character.get())
 
 # Load user preferences
 def load_preferences():
-    global pausekey, root_logdir
+    global pausekey, keylog_dir, mouselog_dir
     # Check that .preferences file exists
     file = pathlib.Path('.preferences')
     if file.exists():
@@ -82,20 +80,23 @@ def load_preferences():
                 data = f.readlines()
                 # First line, extract from 10th character to the newline
                 pausekey = data[0][10:-1]
-                # Second line, extract from 10th character to the newline
-                root_logdir = data[1][10:-1]
-                # Third line, extract from 9th character to the newline
-                curr_profile.set(data[2][9:-1])
-                # Fourth line, extract from 11th character to the end
-                curr_character.set(data[3][11:])
+                # Second line, extract from 12th character to the newline
+                keylog_dir = data[1][12:-1]
+                # Third line, extract from 14th character to the newline
+                mouselog_dir = data[2][14:-1]
+                # Fourth line, extract from 9th character to the newline
+                curr_profile.set(data[3][9:-1])
+                # Fifth line, extract from 11th character to the end
+                curr_character.set(data[4][11:])
         except:
             file.unlink() # unlink = delete
 
 
 
-# Load user preferences
+# Load user preferences and update logger
 load_preferences()
-keylogger.set_log_directory(root_logdir)
+keylogger.set_keylog_directory(keylog_dir)
+keylogger.set_mouselog_directory(mouselog_dir)
 keylogger.set_pause_key(pausekey)
 keylogger.set_profile(curr_profile.get())
 keylogger.set_character(curr_character.get())
@@ -111,7 +112,8 @@ gui.columnconfigure(0, minsize=_windowwidth, weight=1)
 # ----- Frame widgets -----
 # Input logger status frame
 frm_status = tk.Frame(gui, width=_windowwidth)
-frm_status.rowconfigure(0, minsize=50)
+frm_status.rowconfigure(0, minsize=40)
+frm_status.rowconfigure(1, minsize=35)
 frm_status.columnconfigure(0, minsize=_windowwidth/5, weight=1)
 frm_status.columnconfigure(4, minsize=_windowwidth/5, weight=1)
 
@@ -129,26 +131,36 @@ elapsed_time = tk.StringVar()
 elapsed_time.set("00m 00s")
 
 # Create widgets
-lbl_running = tk.Label(frm_status, width=25, font=("Helvetica", 12))
+lbl_running = tk.Label(frm_status, width=25, font=("Helvetica", 11, "bold"))
 btn_toggle = tk.Button(frm_status, text="Start", width=7)
 btn_stop = tk.Button(frm_status, text="Stop", state='disabled', width=7)
+
+lbl_profile = tk.Label(frm_status, text='Profile:')
+lbl_character = tk.Label(frm_status, text='Character:')
 btn_profile = tk.OptionMenu(frm_status, curr_profile, *profiles)
 btn_character = tk.OptionMenu(frm_status, curr_character, *characters)
+
 lbl_loglength = tk.Label(frm_status, text="Log length:")
-lbl_time = tk.Label(frm_status, textvariable=elapsed_time, width=6, font=("Helvetica", 10))
+lbl_time = tk.Label(frm_status, textvariable=elapsed_time, width=6)
 
 # Adjust widgets
 btn_profile.config(width=8)
 btn_character.config(width=8)
 
 # Status widgets positioning
-lbl_running.grid(row=0, column=1, columnspan=3)
-btn_toggle.grid(row=1, column=1, padx=5, sticky='e')
-btn_stop.grid(row=1, column=2, padx=5, sticky='w')
+lbl_running.grid(row=0, column=0, columnspan=5, sticky='s')
+
+lbl_loglength.grid(row=1, column=1, padx=10)
+lbl_time.grid(row=1, column=2, sticky='w')
+
+btn_toggle.grid(row=2, column=3, padx=1)
+btn_stop.grid(row=3, column=3, padx=1)
+
+lbl_profile.grid(row=2, column=0, sticky='e')
 btn_profile.grid(row=2, column=1, padx=5, sticky='e')
-btn_character.grid(row=2, column=2, padx=5, sticky='w')
-lbl_loglength.grid(row=3, column=1, sticky='e')
-lbl_time.grid(row=3, column=2, pady=8, sticky='w')
+
+lbl_character.grid(row=3, column=0, sticky='e')
+btn_character.grid(row=3, column=1, padx=5, sticky='e')
 
 # Status widget behavior
 def update_lbl_status(status):
@@ -222,27 +234,39 @@ lbl_settings = tk.Label(frm_settings, text="Settings", font=("Helvetica", 14, "b
 lbl_settings_info = tk.Label(frm_settings, font=("Helvetica", 10, "italic"))
 
 # Pause key modification
-lbl_pausekey = tk.Label(frm_settings, width=25)
+lbl_pausekey = tk.Label(frm_settings, width=10)
 ent_pausekey = tk.Entry(frm_settings, width=10, state='readonly', 
         readonlybackground='white', justify='center')
-btn_setpausekey = tk.Button(frm_settings, text="Apply")
+btn_setpausekey = tk.Button(frm_settings, text="Set pause key")
 
 # Log directories modification
-lbl_logdirs = tk.Label(frm_settings, width=25)
-ent_logdir = tk.Entry(frm_settings)
-btn_setlogdir = tk.Button(frm_settings, text="Apply")
+lbl_keylog_dir = tk.Label(frm_settings, width=25)
+lbl_mouselog_dir = tk.Label(frm_settings, width=25)
+ent_keylog_dir = tk.Entry(frm_settings)
+ent_mouselog_dir = tk.Entry(frm_settings)
+btn_set_keylog_dir = tk.Button(frm_settings, text="Set key log dir", width=14)
+btn_set_mouselog_dir = tk.Button(frm_settings, text="Set mouse log dir", width=14)
 
 # Settings widgets positioning
-lbl_settings.grid(row=0, columnspan=2) # Along the top
-lbl_settings_info.grid(row=4, columnspan=2) # Along the bottom
+lbl_settings.grid(row=0, columnspan=4, pady=10) # Along the top
+lbl_settings_info.grid(row=5, columnspan=4) # Along the bottom
 
-lbl_pausekey.grid(row=1, column=0)
-ent_pausekey.grid(row=2, column=0)
-btn_setpausekey.grid(row=3, column=0)
+# Position pausekey widgets
+lbl_pausekey.grid(row=2, column=0)
+ent_pausekey.grid(row=3, column=0)
+btn_setpausekey.grid(row=4, column=0, padx=15)
 
-lbl_logdirs.grid(row=1, column=1)
-ent_logdir.grid(row=2, column=1)
-btn_setlogdir.grid(row=3, column=1)
+# Log directory labels
+lbl_keylog_dir.grid(row=1, column=2, columnspan=2)
+lbl_mouselog_dir.grid(row=2, column=2, columnspan=2)
+
+# Enter keyboard logfile directory
+ent_keylog_dir.grid(row=3, column=2)
+btn_set_keylog_dir.grid(row=3, column=3)
+
+# Enter mouse logfile directory
+ent_mouselog_dir.grid(row=4, column=2)
+btn_set_mouselog_dir.grid(row=4, column=3)
 
 # Settings widget behavior
 
@@ -250,7 +274,8 @@ def update_lbl_pausekey(key):
     lbl_pausekey['text'] = f"Pause key: {key}"
 
 def update_lbl_logdirs():
-    lbl_logdirs['text'] = root_logdir + mouse_logdir + '\n' + root_logdir + kb_logdir
+    lbl_keylog_dir['text'] = keylog_dir
+    lbl_mouselog_dir['text'] = mouselog_dir
 
 def set_pausekey(event):
     global pausekey
@@ -272,39 +297,102 @@ def ent_pausekey_update(event):
     ent_pausekey.insert(0, event.keysym)
     ent_pausekey.config(state='readonly')
 
-def set_log_directory(event):
-    global root_logdir
+def set_keylog_directory(event):
+    global keylog_dir
 
     gui.focus() # Take focus off entry widget
-    userinput = ent_logdir.get()
+    userinput = ent_keylog_dir.get()
     
     # some input checking...
     valid = True
-    if userinput and userinput[-1] != '/':
-        userinput += '/' # Append forward slash if necessary
 
-    if not pathlib.Path(userinput).exists():
+    # If string is non-empty
+    if userinput:
+        # Replace any back slashes with forward slashes
+        userinput = userinput.replace('\\', '/')
+        
+        # If no backslashes, prepend current directory
+        if not "/" in userinput:
+            userinput = './' + userinput
+
+        # Add .log file extension if no extension specified
+        if not "." in userinput:
+            userinput += '.log'
+
+        directory = userinput.rsplit('/', 1)[0]
+        print(directory)
+
+        if not pathlib.Path(directory).exists():
+            valid = False
+    else:
         valid = False
     
     if valid:
-        ent_logdir.delete(0, 'end')
+        ent_keylog_dir.delete(0, 'end')
         lbl_settings_info['text'] = ""
         lbl_settings_info.configure(fg="#000000")
         
-        root_logdir = userinput
-        keylogger.set_log_directory(root_logdir)
+        keylog_dir = userinput
+        keylogger.set_keylog_directory(keylog_dir)
         update_lbl_logdirs()
 
         save_preferences()
     else:
-        lbl_settings_info['text'] = f"Invalid directory: {userinput}"
+        lbl_settings_info['text'] = f"Invalid directory: {directory}"
+        lbl_settings_info.configure(fg="#ff0000")
+
+
+def set_mouselog_directory(event):
+    global mouselog_dir
+
+    gui.focus() # Take focus off entry widget
+    userinput = ent_mouselog_dir.get()
+    
+    # some input checking...
+    valid = True
+
+    # If string is non-empty
+    if userinput:
+        # Replace any back slashes with forward slashes
+        userinput = userinput.replace('\\', '/')
+        
+        # If no backslashes, prepend current directory
+        if not "/" in userinput:
+            userinput = './' + userinput
+
+        # Add .log file extension if no extension specified
+        if not "." in userinput:
+            userinput += '.log'
+
+        directory = userinput.rsplit('/', 1)[0]
+        print(directory)
+
+        if not pathlib.Path(directory).exists():
+            valid = False
+    else:
+        valid = False
+    
+    if valid:
+        ent_mouselog_dir.delete(0, 'end')
+        lbl_settings_info['text'] = ""
+        lbl_settings_info.configure(fg="#000000")
+        
+        mouselog_dir = userinput
+        keylogger.set_mouselog_directory(mouselog_dir)
+        update_lbl_logdirs()
+
+        save_preferences()
+    else:
+        lbl_settings_info['text'] = f"Invalid directory: {directory}"
         lbl_settings_info.configure(fg="#ff0000")
 
 # Assign settings widget behavior
 btn_setpausekey.bind('<Button-1>', set_pausekey)
 ent_pausekey.bind('<Return>', set_pausekey)
-btn_setlogdir.bind('<Button-1>', set_log_directory)
-ent_logdir.bind('<Return>', set_log_directory)
+btn_set_keylog_dir.bind('<Button-1>', set_keylog_directory)
+ent_keylog_dir.bind('<Return>', set_keylog_directory)
+btn_set_mouselog_dir.bind('<Button-1>', set_mouselog_directory)
+ent_mouselog_dir.bind('<Return>', set_mouselog_directory)
 
 # Capture special keys in entry widget
 ent_pausekey.bind('<Key>', ent_pausekey_update)

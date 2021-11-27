@@ -23,15 +23,26 @@ pause_keycode = r"'`'"
 # Code for ctrl+c
 #pause_keycode = r"'\x03'"
 
+# Keep track of logger state
 running = False
 paused = False
 
-log_dir = None
+# Declare loggers
+mouse_logger = None
+keyboard_logger = None
+logname = 0 # Increments for each new log
 
-profile = "JON"
-character = "SPY"
+# Keep track of logging time
 logging_start_time = 0
 pause_time = 0
+
+# Directory to save log files in
+keylog_dir = "./keyboard_actions.log"
+mouselog_dir = "./mouse_actions.log"
+
+# Default class values when uninitialized
+profile = "---"
+character = "---"
 
 # Keep track of currently pressed keys (remove repeated presses)
 pressed_keys = set()
@@ -58,23 +69,32 @@ def setup_logger(name, log_filename):
     return logger
 
 
-# Declare loggers
-mouse_logger = None
-keyboard_logger = None
-
-# Initialize loogers and create logging files
+# Initialize loggers and create logging files
 def create_loggers():
-    global mouse_logger, keyboard_logger
-    # Create a logger to handle output to each file
+    global mouse_logger, keyboard_logger, logname
+
+    # Reset loggers if logger is being re-started
     mouse_logger = None
     keyboard_logger = None
-    mouse_logger = setup_logger(str(random.randrange(1000)), log_dir + "mouse_actions.log")
-    keyboard_logger = setup_logger(str(random.randrange(1000)), log_dir + "keyboard_actions.log")
+
+    # Create mouse logger and increment name
+    mouse_logger = setup_logger(str(logname), mouselog_dir)
+    logname += 1 # Ensure unique names
+
+    # Create keyboard logger and increment name
+    keyboard_logger = setup_logger(str(logname), keylog_dir)
+    logname += 1 # Ensure unique names
+
 
 # Change directory where logs are saved
-def set_log_directory(dir):
-    global log_dir
-    log_dir = dir
+def set_mouselog_directory(dir):
+    global mouselog_dir
+    mouselog_dir = dir
+
+# Change directory where logs are saved
+def set_keylog_directory(dir):
+    global keylog_dir
+    keylog_dir = dir
 
 # Change the pause key
 def set_pause_key(key):
