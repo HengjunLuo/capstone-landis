@@ -116,7 +116,72 @@ def extract_keyboard_features(parsedFile, index, seg_length=60):
         freq = values[3] / max(seg_length, 1) # Frequency = # key presses / segment length
 
         # Format the entry in the DataFrame
-        sublist =[key, float("{:.3f}".format(avg_duration)), float("{:.3f}".format(freq)), classID]
+        sublist =[key, float(avg_duration), float(freq), classID]
+        resultList.append(sublist)
+
+    # Return a Pandas DataFrame built from results
+    return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
+
+def extract_mouse_clicks(parsedFile, index, seg_length=60):
+    # The 49 default key bindings for team fortress 2
+    keyBindings = ["left", "right"]
+
+    # Parse the file and get specified segment
+    parsedFile = get_segment(parsedFile, index, seg_length)
+    # Remove all the mouse movement lines(makes the method 1000 times faster)
+    parsedFile = parsedFile[parsedFile.button != "None"]
+
+    resultDict = {} # containing 'key':[last press time, last action, total duration, number of key strokes]
+
+    #Calculate duration and freq for each key between startMin and endMin
+    for _, row in parsedFile.iterrows():
+        # Extract keyname (remove surrounding '' if needed)
+        key = row['button']
+
+        if key in keyBindings:
+            # Get the time of the action
+            time = float(row['time'])
+            action = row['action']
+
+            if key in resultDict.keys():
+                # If this key's last action was 'pressed'
+                if resultDict[key][1] == "pressed":
+                    if action == "released": # Ensure that this key's current action is 'released'
+                        # Record that this key's last action was 'released'
+                        resultDict[key][1] = action
+                        # Add the duration of this key's press (duration = now - time of last press)
+                        resultDict[key][2] += time - resultDict[key][0]
+                        # Increment total number of keypresses for this key
+                        resultDict[key][3] += 1
+
+                else: # If last action was not 'pressed'
+                    if action == "pressed": # Ensure that this action is 'pressed'
+                        # Record time of this key press
+                        resultDict[key][0] = time
+                        # Record that this key's last action was 'pressed'
+                        resultDict[key][1] = action
+
+            else: # If the key hasn't been processed yet, add it to the dictionary
+                if action == "pressed": # Only if the key's first action is 'pressed'
+                    # Record when the key was pressed and nitialize duration and press count
+                    resultDict[key] = [time, action, 0, 0]
+
+
+    # Default value if log is empty
+    classID = "Null"
+
+    if len(parsedFile.index) > 0: # If the dataframe isnt empty
+        # Infer class label from first line
+        classID = parsedFile.iloc[0]["class"] 
+
+    # Build Pandas DataFrame from results
+    resultList = [] # Empty 2D array
+    for key, values in resultDict.items():
+        avg_duration = values[2] / max(values[3], 1) # Average duration = total duration / # key presses
+        freq = values[3] / max(seg_length, 1) # Frequency = # key presses / segment length
+
+        # Format the entry in the DataFrame
+        sublist =[key, float(avg_duration), float(freq), classID]
         resultList.append(sublist)
 
     # Return a Pandas DataFrame built from results
