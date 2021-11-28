@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from log_parser import extract_keyboard_features
+from log_parser import extract_mouse_clicks
 
 
 """
@@ -18,16 +19,16 @@ class KeyboardHeatmap:
     index: The index of the segment
     seg_length: The length of the segment (default 60)
     """
-    def __init__(self, dataframe, index, seg_length=60):
+    def __init__(self, dataframe,mousedf, index, seg_length=60):
         # The 49 default key bindings for team fortress 2
-        self.keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
+        self.keyBindings = ["left","right","w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
                     "v","y","u","z","x","c","Key.comma",".","m","n","Key.f2","Key.f3","l","g",
                     "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
                     "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
 
         # Extract frequency and duration data from segment
         self.keyboard_df = extract_keyboard_features(dataframe, index, seg_length)
-
+        self.keyboard_df.append(extract_mouse_clicks(mousedf, index, seg_length))
         self.class_label_ = "Null"
         # Check that data is not empty
         if len(self.keyboard_df.index) > 0:
@@ -53,8 +54,8 @@ class KeyboardHeatmap:
     """
     def show_heatmap(self):
 
-        a1 = self.arrFreq.reshape((7, 7))
-        a2 = self.arrDura.reshape((7, 7))
+        a1 = self.arrFreq.reshape((17, 3))
+        a2 = self.arrDura.reshape((17, 3))
         a3 = np.append(a1, a2, axis=1)
 
         plt.figure(figsize=(8, 4))
@@ -66,8 +67,8 @@ class KeyboardHeatmap:
     Return the heatmap as a numpy array for feature input
     """
     def heatmap_data(self):
-        a1 = self.arrFreq.reshape((7, 7))
-        a2 = self.arrDura.reshape((7, 7))
+        a1 = self.arrFreq.reshape((17, 3))
+        a2 = self.arrDura.reshape((17, 3))
         return np.append(a1, a2, axis=1)
     
     """
