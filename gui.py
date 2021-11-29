@@ -57,11 +57,11 @@ _windowwidth  = 375
 _windowheight = 250
 
 def get_log_directory():
-    return "./src/logs/" + curr_profile.get() + '/' + curr_character.get() + '/'
+    return "./logs/" + curr_profile.get() + '/' + curr_character.get() + '/'
 
 # Save user preferences
 def save_preferences():
-    with open('./src/.preferences', 'w', encoding='utf-8') as f:
+    with open('./.preferences', 'w', encoding='utf-8') as f:
             f.write("pausekey: " + pausekey + '\n')
             f.write("profile: " + curr_profile.get() + '\n')
             f.write("character: " + curr_character.get() + '\n')
@@ -74,14 +74,14 @@ def update_routing_table():
     mouselog_dir = lbl_mouselog_dir['text'] + '\n'
     
     # Read all lines from routing file and check for matches
-    with open('./src/.routing', 'r', encoding='utf-8') as f:
+    with open('./.routing', 'r', encoding='utf-8') as f:
                 entries = f.readlines()
                 for entry in entries:
                     if entry == keylog_dir or entry == mouselog_dir:
                         return
     
     # Write logfile paths to routing file
-    with open('./src/.routing', 'a', encoding='utf-8') as f:
+    with open('./.routing', 'a', encoding='utf-8') as f:
             f.write(mouselog_dir)
             f.write(keylog_dir)
 
@@ -89,11 +89,11 @@ def update_routing_table():
 def load_preferences():
     global pausekey
     # Check that .preferences file exists
-    file = pathlib.Path('./src/.preferences')
+    file = pathlib.Path('./.preferences')
     if file.exists():
         # If any of the following operations fail, delete .preferences
         try:
-            with open('./src/.preferences', 'r', encoding='utf-8') as f:
+            with open('./.preferences', 'r', encoding='utf-8') as f:
                 data = f.readlines()
                 # First line, extract from 10th character to the newline
                 pausekey = data[0][10:-1]
