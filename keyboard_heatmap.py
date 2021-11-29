@@ -77,11 +77,12 @@ class KeyboardHeatmap:
         return self.class_label_
 
     def to_binary_class_label(self,target="Null"):
+        newHeatmap = self
         if self.class_label_ == target:
-            self.class_label_ = 1
+            newHeatmap.class_label_ = 1
         else:
-            self.class_label_ = 0
-        return self
+            newHeatmap.class_label_ = 0
+        return newHeatmap
     """
     Display the data as an infographic
     """
