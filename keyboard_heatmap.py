@@ -13,6 +13,13 @@ showing each keys frequency and duration during the specified segment
 """
 class KeyboardHeatmap:
 
+    # Class attribute
+    # The 49 default key bindings for team fortress 2
+    keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
+                    "v","y","u","z","x","c","Key.comma",".","m","n","Key.f2","Key.f3","l","g",
+                    "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
+                    "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
+
     """
     Construct the heatmap object by passing it a pandas dataframe
     The dataframe must be generated from a keyboard_actions log file
@@ -20,12 +27,7 @@ class KeyboardHeatmap:
     seg_length: The length of the segment (default 60)
     """
     def __init__(self, dataframe, index, seg_length=60):
-        # The 49 default key bindings for team fortress 2
-        self.keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
-                    "v","y","u","z","x","c","Key.comma",".","m","n","Key.f2","Key.f3","l","g",
-                    "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
-                    "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
-
+        
         # Extract frequency and duration data from segment
         self.keyboard_df = extract_keyboard_features(dataframe, index, seg_length)
         self.class_label_ = "Null"
@@ -38,14 +40,14 @@ class KeyboardHeatmap:
         self.keyboard_df.set_index('key', inplace=True)
 
         # Create np arrays initialized with 0s the same shape as the keybindings list
-        self.arrFreq = np.zeros_like(self.keyBindings, dtype=float)
-        self.arrDura = np.zeros_like(self.keyBindings, dtype=float)
+        self.arrFreq = np.zeros_like(KeyboardHeatmap.keyBindings, dtype=float)
+        self.arrDura = np.zeros_like(KeyboardHeatmap.keyBindings, dtype=float)
 
         # For each entry in the DataFrame, insert data into arrays
-        for key in self.keyBindings:
+        for key in KeyboardHeatmap.keyBindings:
             if key in self.keyboard_df.index:
-                self.arrFreq[self.keyBindings.index(key)] = self.keyboard_df.freq[key]
-                self.arrDura[self.keyBindings.index(key)] = self.keyboard_df.avg_duration[key]
+                self.arrFreq[KeyboardHeatmap.keyBindings.index(key)] = self.keyboard_df.freq[key]
+                self.arrDura[KeyboardHeatmap.keyBindings.index(key)] = self.keyboard_df.avg_duration[key]
 
 
     """
@@ -69,6 +71,17 @@ class KeyboardHeatmap:
         a1 = self.arrFreq.reshape((7, 7))
         a2 = self.arrDura.reshape((7, 7))
         return np.append(a1, a2, axis=1)
+
+    """
+    Return the heatmap data as column names in ravel()ed heatmap order
+    """
+    @staticmethod
+    def heatmap_data_names():
+        frequency_names = np.array([key+'_frequency' for key in KeyboardHeatmap.keyBindings])
+        duration_names = np.array([key+'_duration' for key in KeyboardHeatmap.keyBindings])
+        a1 = frequency_names.reshape((7, 7))
+        a2 = duration_names.reshape((7, 7))
+        return np.append(a1, a2, axis=1).ravel()
     
     """
     Return the class that the heatmap data belongs to
@@ -97,13 +110,13 @@ class KeyboardHeatmap:
         ax2.imshow([self.arrDura], cmap='cividis')
 
         # Set ticks and labels
-        ax1.set_xticks(np.arange(len(self.keyBindings)))
-        ax1.set_xticklabels(self.keyBindings)
+        ax1.set_xticks(np.arange(len(KeyboardHeatmap.keyBindings)))
+        ax1.set_xticklabels(KeyboardHeatmap.keyBindings)
         ax1.set_yticks(np.arange(len(['Frequency'])))
         ax1.set_yticklabels(['Frequency'])
 
-        ax2.set_xticks(np.arange(len(self.keyBindings)))
-        ax2.set_xticklabels(self.keyBindings)
+        ax2.set_xticks(np.arange(len(KeyboardHeatmap.keyBindings)))
+        ax2.set_xticklabels(KeyboardHeatmap.keyBindings)
         ax2.set_yticks(np.arange(len(['Average Duraion'])))
         ax2.set_yticklabels(['Average Duraion'])
         
@@ -111,7 +124,7 @@ class KeyboardHeatmap:
         plt.setp(ax1.get_xticklabels(), rotation=-30, ha="right")
         plt.setp(ax2.get_xticklabels(), rotation=-30, ha="right")
 
-        for i in range(len(self.keyBindings)):
+        for i in range(len(KeyboardHeatmap.keyBindings)):
             ax1.text(i, 0, self.arrFreq[i], ha='center')
             ax2.text(i, 0, self.arrDura[i], ha='center')
             
