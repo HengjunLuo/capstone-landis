@@ -117,11 +117,12 @@ def extract_keyboard_features(parsedFile, index, seg_length=60):
         freq = values[3] / max(seg_length, 1) # Frequency = # key presses / segment length
 
         # Format the entry in the DataFrame
-        sublist =[key, float(avg_duration), float(freq), classID]
+        sublist =[key, values[3], float(avg_duration), float(freq), classID]
         resultList.append(sublist)
 
     # Return a Pandas DataFrame built from results
-    return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
+    return pd.DataFrame(resultList, columns = ['key', 'count', 'avg_duration', 'freq', 'class'])
+
 
 mouseBindings = ["left", "right"]
 
