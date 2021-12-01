@@ -1,7 +1,5 @@
 import pandas as pd
 
-
-
 """
 Basic parsing of keyboard log files
 
@@ -11,7 +9,6 @@ returns: Pandas DataFrame
 def parse_keyboard_log(filepath):
     return pd.read_csv(filepath, names=['time', 'key', 'action', 'class'])
 
-
 """
 Basic parsing of mouse log files
 
@@ -20,7 +17,6 @@ returns: Pandas DataFrame
 """
 def parse_mouse_log(filepath):
     return pd.read_csv(filepath, names=['time', 'x', 'y', 'button', 'action', 'class'])
-
 
 """
 Parse a specified segment from a log file
@@ -55,12 +51,17 @@ returns: Pandas DataFrame
 
 *Note* Segment length determines index, i.e. "The 5th 15-second segment"
 """
+
+ # The 49 default key bindings for team fortress 2
+keyBindings = ["w","a","s","d",
+                "Key.space",
+                "Key.ctrl_l",
+                "Key.comma",".",
+                "q", "v", "b", "r",
+                "1","2","3","4","5","6","7","8","9","0",
+                "Key.tab"]
+
 def extract_keyboard_features(parsedFile, index, seg_length=60):
-    # The 49 default key bindings for team fortress 2
-    keyBindings = ["w","a","s","d","Key.space","Key.ctrl_l","'","/","Key.up","Key.down",
-                "v","y","u","z","x","c","Key.comma",".","m","n","Key.f2","Key.f3","l","g",
-                "h","i","f","b","-","r","q","1","2","3","4","5","6","7","8","9","0",
-                "t","Key.tab","Key.f5","Key.f6","Key.f7","`","j","k"]
 
     # Parse the file and get specified segment
     parsedFile = get_segment(parsedFile, index, seg_length)
@@ -122,9 +123,9 @@ def extract_keyboard_features(parsedFile, index, seg_length=60):
     # Return a Pandas DataFrame built from results
     return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
 
+mouseBindings = ["left", "right"]
+
 def extract_mouse_clicks(parsedFile, index, seg_length=60):
-    # The 49 default key bindings for team fortress 2
-    keyBindings = ["left", "right"]
 
     # Parse the file and get specified segment
     parsedFile = get_segment(parsedFile, index, seg_length)
@@ -138,7 +139,7 @@ def extract_mouse_clicks(parsedFile, index, seg_length=60):
         # Extract keyname (remove surrounding '' if needed)
         key = row['button']
 
-        if key in keyBindings:
+        if key in mouseBindings:
             # Get the time of the action
             time = float(row['time'])
             action = row['action']
