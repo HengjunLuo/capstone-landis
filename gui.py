@@ -42,6 +42,11 @@ characters = [
     "SPY"
 ]
 
+methods = [
+    "RF",
+    "KNN",
+    "ANN"
+]
 
 class CollapsableFrame(tk.Frame):
 
@@ -97,6 +102,8 @@ class LandisLogger(tk.Tk):
         self.curr_profile.set("profile")
         self.curr_character = tk.StringVar()
         self.curr_character.set("character")
+        self.curr_method = tk.StringVar()
+        self.curr_method.set("method")
 
         # Classifier
         self.classifier = None
@@ -145,8 +152,10 @@ class LandisLogger(tk.Tk):
 
         self.lbl_profile = tk.Label(self.frm_status, text='Profile:')
         self.lbl_character = tk.Label(self.frm_status, text='Character:')
+        self.lbl_method = tk.Label(self.frm_status, text='Method:')
         self.btn_profile = tk.OptionMenu(self.frm_status, self.curr_profile, *profiles)
         self.btn_character = tk.OptionMenu(self.frm_status, self.curr_character, *characters)
+        self.btn_method = tk.OptionMenu(self.frm_status, self.curr_method, *methods)
 
         self.lbl_loglength = tk.Label(self.frm_status, text="Log length:")
         self.lbl_time = tk.Label(self.frm_status, textvariable=self.elapsed_time, width=6)
@@ -186,7 +195,7 @@ class LandisLogger(tk.Tk):
         # Training takes a few seconds, so we dont want to call it every time a gui option is changed
         # For now, we will call it when user selects start
         training_segment_length = 100
-        self.classifier = dt.LANDIS_classifier(self.curr_profile.get()+self.curr_character.get(), training_segment_length)
+        self.classifier = dt.LANDIS_classifier( self.curr_method.get(), self.curr_profile.get()+self.curr_character.get(), training_segment_length)
     
 
     def update_prediction(self):
@@ -431,6 +440,7 @@ class LandisLogger(tk.Tk):
         # Adjust widgets
         self.btn_profile.config(width=8)
         self.btn_character.config(width=8)
+        self.btn_method.config(width=8)
 
         # Status widgets positioning
         self.lbl_running.grid(row=0, column=0, columnspan=5, sticky='s')
@@ -447,8 +457,11 @@ class LandisLogger(tk.Tk):
         self.lbl_character.grid(row=3, column=0, sticky='e')
         self.btn_character.grid(row=3, column=1, padx=5, sticky='e')
 
-        self.lbl_prediction.grid(row=4, column=1, padx=10)
-        self.lbl_predicted.grid(row=4, column=2, sticky='w')
+        self.lbl_method.grid(row=4, column=0, sticky='e')
+        self.btn_method.grid(row=4, column=1, padx=5, sticky='e')
+
+        self.lbl_prediction.grid(row=5, column=1, padx=10)
+        self.lbl_predicted.grid(row=5, column=2, sticky='w')
 
         # Assign settings widget behavior
         self.btn_toggle.bind('<Button-1>', self.toggle_status)

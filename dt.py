@@ -2,11 +2,15 @@ from log_parser import parse_keyboard_log
 from log_parser import parse_mouse_log
 from keyboard_heatmap import KeyboardHeatmap
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPRegressor
 
 class LANDIS_classifier: 
     # class name needs to be considered, this could be our generalized class for all classification methods
-    def __init__(self, target, seg_length):
+    def __init__(self, ct, target, seg_length):
         self.target = target
+        self.classifier_type = ct
+
         routing_file = open('.routing', 'r')
         Lines = routing_file.readlines()
 
@@ -16,9 +20,9 @@ class LANDIS_classifier:
 
         for line in Lines:
             line = line.strip()
-            if 'keyboard_actions.log' in line:
+            if 'key.log' in line:
                 keyboard.append(parse_keyboard_log(line))
-            elif 'mouse_actions.log' in line:
+            elif 'mouse.log' in line:
                 mouse.append(parse_mouse_log(line))
 
         X_train = []
@@ -32,11 +36,26 @@ class LANDIS_classifier:
                 heatmap = heatmap.to_binary_class_label(target)
                 # If the heatmap isn't blank
                 if heatmap.class_label() != 'Null':
-                    X_train.append(heatmap.heatmap_data().ravel().tolist())
+                    X_train.append(heatmap.heatmap_data())
                     Y_train.append(heatmap.class_label())
-
-        self.rfc = RandomForestClassifier(n_jobs=-1, criterion='gini', max_features= 'sqrt', n_estimators = 100, oob_score = True)
-        self.rfc.fit(X_train, Y_train) 
+        
+        if ct == "RF":
+            self.classifier = RandomForestClassifier(
+                n_jobs=-1, 
+                criterion='gini',
+                max_features= 'sqrt',
+                n_estimators = 100, 
+                oob_score = True)
+        #elif ct == "KNN":
+        # implement KNN classifier here
+        else :
+            self.classifier = MLPClassifier(
+                hidden_layer_sizes=(100,100), 
+                activation='relu', 
+                solver='adam', 
+                max_iter=10000)
+        
+        self.classifier.fit(X_train, Y_train) 
     
     def predict(self, filepath):
         # Currently only uses keyboard file, will eventually have to use mouse
@@ -46,6 +65,6 @@ class LANDIS_classifier:
         heatmap = KeyboardHeatmap(keyboard, 0, keyboard.time.iloc[-1])
         heatmap = heatmap.to_binary_class_label(self.target)
         if heatmap.class_label() != 'Null':
-            return self.rfc.predict(heatmap.heatmap_data())
+            return self.classifier.predict(heatmap.heatmap_data())
         else:
             return "---"
