@@ -12,6 +12,8 @@ Known issues:
 """
 
 import input_logger as keylogger
+import log_parser
+import dt
 import tkinter as tk
 import pathlib
 
@@ -38,6 +40,8 @@ characters = [
     "SPY"
 ]
 
+classifier = None
+
 # Create main window
 gui = tk.Tk()
 
@@ -49,12 +53,24 @@ curr_profile = tk.StringVar()
 curr_profile.set("profile")
 curr_character = tk.StringVar()
 curr_character.set("character")
+curr_prediction = tk.StringVar()
+curr_prediction.set("---")
 
 started = False
 
 # Window settings
 _windowwidth  = 375
 _windowheight = 250
+
+def init_classifier():
+    # Call to initialize and train a classifier for the selected parameters
+    # Important parameters are target class, profile, and the type of classifier
+    # For now solution will only use decision tree
+    # Training takes a few seconds, so we dont want to call it every time a gui option is changed
+    # For now, we will call it when user selects start
+    global classifier 
+    training_segment_length = 100
+    classifier = dt.LANDIS_classifier(curr_profile.get()+curr_character.get(), training_segment_length)
 
 def get_log_directory():
     return "./logs/" + curr_profile.get() + '/' + curr_character.get() + '/'
@@ -147,6 +163,9 @@ lbl_character = tk.Label(frm_status, text='Character:')
 btn_profile = tk.OptionMenu(frm_status, curr_profile, *profiles)
 btn_character = tk.OptionMenu(frm_status, curr_character, *characters)
 
+lbl_prediction = tk.Label(frm_status, text="Prediction:")
+lbl_predicted = tk.Label(frm_status, textvariable=curr_prediction, width=6)
+
 lbl_loglength = tk.Label(frm_status, text="Log length:")
 lbl_time = tk.Label(frm_status, textvariable=elapsed_time, width=6)
 
@@ -169,6 +188,9 @@ btn_profile.grid(row=2, column=1, padx=5, sticky='e')
 lbl_character.grid(row=3, column=0, sticky='e')
 btn_character.grid(row=3, column=1, padx=5, sticky='e')
 
+lbl_prediction.grid(row=4, column=1, padx=10)
+lbl_predicted.grid(row=4, column=2, sticky='w')
+
 # Status widget behavior
 def update_lbl_status(status):
     lbl_running['text'] = f"Input logger status: {status}"
@@ -177,6 +199,7 @@ def toggle_status(event):
     global started
     # State machine of toggle button
     if btn_toggle['text'] == "Start":
+        init_classifier()
         keylogger.start()
         btn_toggle['text'] = "Pause"
         btn_stop['state'] = 'normal'
@@ -231,6 +254,12 @@ def check_status():
 
     if keylogger.running:
         gui.after(100, check_status) # Run this function every 0.1s
+        gui.after(10000, update_prediction) # Update prediction every 10s (This seems like a good opportunity for threads)
+
+def update_prediction():
+    # Ideally we would have access to a dataframe that is being updates to by input_logger.py
+    # For now this inefficient method will work
+    curr_prediction.set(classifier.predict(lbl_keylog_dir['text']))
 
 # Assign settings widget behavior
 btn_toggle.bind('<Button-1>', toggle_status)
