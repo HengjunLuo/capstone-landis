@@ -19,6 +19,10 @@ import pathlib
 import log_parser
 import classifier
 
+# Names of output files
+keylog_filename = "key.log"
+mouselog_filename = "mouse.log"
+
 # Profiles to choose from
 profiles = [
     "JON",
@@ -96,8 +100,7 @@ class LandisLogger(tk.Tk):
 
         # Persistent variable initial values
         self.pausekey = "`"
-        self.keylog_filename = "key.log"
-        self.mouselog_filename = "mouse.log"
+        self.log_dir = './'
         self.curr_profile = tk.StringVar()
         self.curr_profile.set("profile")
         self.curr_character = tk.StringVar()
@@ -247,8 +250,8 @@ class LandisLogger(tk.Tk):
             
             # Write logfile paths to routing file
             with open('.routing', 'a', encoding='utf-8') as f:
-                    f.write(self.log_dir + self.keylog_filename)
-                    f.write(self.log_dir + self.mouselog_filename)
+                    f.write(self.log_dir + keylog_filename)
+                    f.write(self.log_dir + mouselog_filename)
 
 
     def get_default_log_directory(self):
@@ -311,7 +314,7 @@ class LandisLogger(tk.Tk):
         self.lbl_pausekey['text'] = f"Pause key: {key}"
 
     def update_lbl_logdir(self):
-        if self.use_default_dir:
+        if self.use_default_dir.get():
             self.lbl_log_dir['text'] = self.get_default_log_directory()
         else:
             self.lbl_log_dir['text'] = self.log_dir
