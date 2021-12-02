@@ -195,7 +195,7 @@ class LandisLogger(tk.Tk):
         # Training takes a few seconds, so we dont want to call it every time a gui option is changed
         # For now, we will call it when user selects start
         training_segment_length = 100
-        self.classifier = dt.LANDIS_classifier( self.curr_method.get(), self.curr_profile.get()+self.curr_character.get(), training_segment_length)
+        self.classifier = classifier.LANDIS_classifier(self.curr_method.get(), self.curr_profile.get()+self.curr_character.get(), training_segment_length)
     
 
     def update_prediction(self):

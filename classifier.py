@@ -36,7 +36,7 @@ class LANDIS_classifier:
                 heatmap = heatmap.to_binary_class_label(target)
                 # If the heatmap isn't blank
                 if heatmap.class_label() != 'Null':
-                    X_train.append(heatmap.heatmap_data())
+                    X_train.append(heatmap.heatmap_data().ravel().tolist())
                     Y_train.append(heatmap.class_label())
         
         if ct == "RF":
