@@ -17,7 +17,7 @@ from tkinter import ttk
 import pathlib
 
 import log_parser
-import dt
+import classifier
 
 # Profiles to choose from
 profiles = [
