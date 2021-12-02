@@ -35,9 +35,10 @@ logname = 0 # Increments for each new log
 logging_start_time = 0
 pause_time = 0
 
-# Directory to save log files in
-keylog_dir = "./keyboard_actions.log"
-mouselog_dir = "./mouse_actions.log"
+# Default directory to save log files in
+log_dir = "./"
+keylog_filename = "key.log"
+mouselog_filename = "mouse.log"
 
 # Default class values when uninitialized
 profile = "---"
@@ -48,10 +49,10 @@ pressed_keys = set()
 
 """
 Logging mechanism:
-    Record all keystrokes to "keyboard_actions.log" (same directory)
-    Record all mouse actions to "mouse_actions.log" (same directory)
+    Record all keystrokes to "key.log"
+    Record all mouse actions to "mouse.log"
     Records are logged as csv files for easy parsing
-    Clears old log files every time keylogger is run
+    Overwrites existing log files in save location
 """
 def setup_logger(name, log_filename):
     # File handler manages i/o to the logfile
@@ -75,23 +76,20 @@ def create_loggers():
     mouse_logger = None
     keyboard_logger = None
 
-    # Create mouse logger and increment name
-    mouse_logger = setup_logger(str(logname), mouselog_dir)
-    logname += 1 # Ensure unique names
-
     # Create keyboard logger and increment name
-    keyboard_logger = setup_logger(str(logname), keylog_dir)
+    keyboard_logger = setup_logger(str(logname), log_dir + keylog_filename)
     logname += 1 # Ensure unique names
 
-# Change directory where logs are saved
-def set_mouselog_directory(dir):
-    global mouselog_dir
-    mouselog_dir = dir
+    # Create mouse logger and increment name
+    mouse_logger = setup_logger(str(logname), log_dir + mouselog_filename)
+    logname += 1 # Ensure unique names
+
 
 # Change directory where logs are saved
-def set_keylog_directory(dir):
-    global keylog_dir
-    keylog_dir = dir
+def set_log_directory(new_dir):
+    global log_dir
+    log_dir = new_dir
+
 
 # Change the pause key
 def set_pause_key(key):
