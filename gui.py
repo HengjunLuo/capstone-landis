@@ -424,6 +424,7 @@ class LandisLogger(tk.Tk):
         self.rowconfigure(0, minsize=height/2, weight=1)
         self.rowconfigure(1, minsize=height/2, weight=1)
         self.columnconfigure(0, minsize=width, weight=1)
+        self.attributes('-topmost',True)
 
     def configure_frames(self, windowwidth, windowheight):
         # Input logger status frame
