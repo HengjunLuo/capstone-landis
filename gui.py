@@ -206,7 +206,7 @@ class LandisLogger(tk.Tk):
         # For now this inefficient method will work
         if keylogger.running:
             self.curr_prediction.set(self.classifier.predict(self.lbl_log_dir['text']))
-            self.after(10000, self.update_prediction) # Run this function every 10s
+            self.after(60000, self.update_prediction) # Run this function every 60s
 
     """
     File persistence methods
