@@ -62,6 +62,8 @@ class LANDIS_classifier:
         # filepath as argument is a little convoluted, we are reading csv that is currently being written to
         # getting dataframe from input_logger would be better
         keyboard = parse_keyboard_log(filepath + "key.log")
+        if keyboard.empty:
+            return "---"
         file = open(filepath + "key.log","r+")
         file. truncate(0)
         heatmap = KeyboardHeatmap(keyboard, 0, keyboard.time.iloc[-1])

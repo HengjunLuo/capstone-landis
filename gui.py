@@ -199,12 +199,14 @@ class LandisLogger(tk.Tk):
         # For now, we will call it when user selects start
         training_segment_length = 100
         self.classifier = classifier.LANDIS_classifier(self.curr_method.get(), self.curr_profile.get()+self.curr_character.get(), training_segment_length)
-    
 
+    
     def update_prediction(self):
         # Ideally we would have access to a dataframe that is being updates to by input_logger.py
         # For now this inefficient method will work
-        self.curr_prediction.set(self.classifier.predict(self.lbl_log_dir['text']))
+        if keylogger.running:
+            self.curr_prediction.set(self.classifier.predict(self.lbl_log_dir['text']))
+            self.after(10000, self.update_prediction) # Run this function every 10s
 
     """
     File persistence methods
@@ -275,6 +277,7 @@ class LandisLogger(tk.Tk):
             self.btn_stop['state'] = 'normal'
             self.started = True
             self.check_status() # Start periodic status update checks
+            self.update_prediction()
         elif self.btn_toggle['text'] == "Pause":
             keylogger.pause()
             self.btn_toggle['text'] = "Resume"
@@ -413,7 +416,6 @@ class LandisLogger(tk.Tk):
 
         if keylogger.running:
             self.after(100, self.check_status) # Run this function every 0.1s
-            gui.after(10000, self.update_prediction) # Update prediction every 10s (This seems like a good opportunity for threads)
 
     """
     Window configuration methods
