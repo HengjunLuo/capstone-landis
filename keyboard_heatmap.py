@@ -104,7 +104,7 @@ class KeyboardHeatmap:
     """
     def show_infographic(self):
         # Setting up the heatmaps
-        fig, axes = plt.subplots( nrows=2)
+        fig, axes = plt.subplots(nrows=2)
         ax1,ax2 = axes
         plt.subplots_adjust(top=0.1, bottom=0)
         
@@ -128,8 +128,8 @@ class KeyboardHeatmap:
         plt.setp(ax2.get_xticklabels(), rotation=-30, ha="right")
 
         for i in range(len(KeyboardHeatmap.keyBindings)):
-            ax1.text(i, 0, self.arrFreq[i], ha='center')
-            ax2.text(i, 0, self.arrDura[i], ha='center')
+            ax1.text(i, 0, f"{self.arrFreq[i]:.2f}", ha='center')
+            ax2.text(i, 0, f"{self.arrDura[i]:.2f}", ha='center')
             
         ax1.set_title("Frequency")
         ax2.set_title("Average Duration")
