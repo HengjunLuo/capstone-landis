@@ -71,13 +71,19 @@ class LANDIS_classifier:
         if heatmap.class_label() != 'Null':
             if len(self.mostRecentPredictions) < 2:
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                return self.mostRecentPredictions
+                return self.mostRecentPredictions[-1]
             elif len(self.mostRecentPredictions) == 2:
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                return self.mostRecentPredictions
+                if sum(self.mostRecentPredictions) >1:
+                    return 1
+                else:
+                    return 0
             else:
                 self.mostRecentPredictions.pop(0)
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                return self.mostRecentPredictions
+                if sum(self.mostRecentPredictions) >1:
+                    return 1
+                else:
+                    return 0
         else:
             return "---"
