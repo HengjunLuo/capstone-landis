@@ -69,19 +69,36 @@ class LANDIS_classifier:
         heatmap = KeyboardHeatmap(keyboard, 0, keyboard.time.iloc[-1])
         heatmap = heatmap.to_binary_class_label(self.target)
         if heatmap.class_label() != 'Null':
-            if len(self.mostRecentPredictions) < 2:
+            if len(self.mostRecentPredictions) < 2: 
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                return self.mostRecentPredictions[-1]
+                return self.mostRecentPredictions[-1]# return the most recent prediction
             elif len(self.mostRecentPredictions) == 2:
+                # now we have 3 predictions, now vote!
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                if sum(self.mostRecentPredictions) >1:
+                if sum(self.mostRecentPredictions) > 1:
                     return 1
                 else:
                     return 0
-            else:
+            elif len(self.mostRecentPredictions) == 3:
+                
+                # now we have 4 predictions, but we only use the most recent 3 predictions to vote
+                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
+                if sum(self.mostRecentPredictions[-3]) > 1:
+                    return 1
+                else:
+                    return 0
+            elif len(self.mostRecentPredictions) == 4:
+                # now we have 5 predictions, vote!
+                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
+                if sum(self.mostRecentPredictions) > 2:
+                    return 1
+                else:
+                    return 0
+            elif len(self.mostRecentPredictions) == 5:
+                # pop the oldest prediction and then add a new one to keep the prediction list size as 5
                 self.mostRecentPredictions.pop(0)
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                if sum(self.mostRecentPredictions) >1:
+                if sum(self.mostRecentPredictions) > 2:
                     return 1
                 else:
                     return 0
