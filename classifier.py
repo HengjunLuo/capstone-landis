@@ -10,7 +10,7 @@ class LANDIS_classifier:
     def __init__(self, ct, target, seg_length):
         self.target = target
         self.classifier_type = ct
-
+        self.mostRecentPredictions = []
         routing_file = open('.routing', 'r')
         Lines = routing_file.readlines()
 
@@ -62,9 +62,20 @@ class LANDIS_classifier:
         # filepath as argument is a little convoluted, we are reading csv that is currently being written to
         # getting dataframe from input_logger would be better
         keyboard = parse_keyboard_log(filepath + "key.log")
+        file = open(filepath + "key.log","r+")
+        file. truncate(0)
         heatmap = KeyboardHeatmap(keyboard, 0, keyboard.time.iloc[-1])
         heatmap = heatmap.to_binary_class_label(self.target)
         if heatmap.class_label() != 'Null':
-            return self.classifier.predict(heatmap.heatmap_data())
+            if len(self.mostRecentPredictions) < 2:
+                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
+                return self.mostRecentPredictions
+            elif len(self.mostRecentPredictions) == 2:
+                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
+                return self.mostRecentPredictions
+            else:
+                self.mostRecentPredictions.pop(0)
+                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
+                return self.mostRecentPredictions
         else:
             return "---"
