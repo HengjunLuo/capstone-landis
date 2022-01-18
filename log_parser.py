@@ -188,3 +188,55 @@ def extract_mouse_clicks(parsedFile, index, seg_length=60):
 
     # Return a Pandas DataFrame built from results
     return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
+
+predefined_patterns = {'w':['s'], 's':['w'], 'd':['f'], 'f':['d']}
+def extract_predefined_patterns(parsedFile, index, seg_length=60):
+
+    # Parse the file and get specified segment
+    parsedFile = get_segment(parsedFile, index, seg_length)
+
+    # Temperory dictionaries used to stire the most recent press or release for keys in the predefined_patterns
+    tempPressDict = {}
+    tempReleaseDict = {}
+    # The result dictionary used to store the average/highest/shortest duration for the key release-press pairs in the predefined_patterns
+    # The result should have the following format:  'resultKey':[totalDuration, freq, longestDuration, shortestDuration, averageDuration]
+    resultDict = {}
+    #Find the key release-press pairs and calculate duration and freq for each pair, and re
+    for _, row in parsedFile.iterrows():
+        # Extract keyname (remove surrounding '' if needed)
+        key = row['key']
+        key = key.replace("'", "")
+
+        if key in predefined_patterns:
+            # Get the time and the action for this row
+            time = float(row['time'])
+            action = row['action']
+
+            if action == 'pressed': # if it is the press of a release-press pair
+                # Update the time in tempPressDict
+                tempPressDict[key] = time
+                # Check for the release-press pair
+                for pairedKey in predefined_patterns[key]:# check release-press pair for all paired keys for this key
+                    if pairedKey in tempReleaseDict:# if we have the data for the required key release 
+                        # Validate a release-press pair by 2 metrics: 1. press time < release time. 2. (press time - release time) < 0.5 second
+                        if tempReleaseDict[pairedKey] < time and time - tempReleaseDict[pairedKey] <= 0.5:
+                            curr_duration = time - tempReleaseDict[pairedKey]# calculate duration for this release-press pair
+                            resultKey = key + pairedKey # compute resultKey
+                            if resultKey in resultDict:# if it's not the first record for resultKey
+                                # update total duration and freq
+                                resultDict[resultKey][0] += curr_duration
+                                resultDict[resultKey][1] += 1
+                                if resultDict[resultKey][2] < curr_duration:# update longest duration
+                                    resultDict[resultKey][2] = curr_duration
+                                elif resultDict[resultKey][3] > curr_duration:# update shortest duration
+                                    resultDict[resultKey][3] = curr_duration
+                            else:# if it is the first record for resultKey
+                                resultDict[resultKey] = [curr_duration,1,curr_duration,curr_duration,0]
+            else: # if it is the release of a release-press pair
+                tempReleaseDict[key] = time # Update the time in tempReleaseDict
+    # Calculate the average duration for each pair in the result dictionary
+    for pair in resultDict:
+        resultDict[pair][4] = resultDict[pair][0]/resultDict[pair][1]
+        resultDict[pair] = [resultDict[pair][2],resultDict[pair][3],resultDict[pair][4]]# drop the total duration and freq
+
+
