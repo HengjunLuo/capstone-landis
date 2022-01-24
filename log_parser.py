@@ -238,5 +238,23 @@ def extract_predefined_patterns(parsedFile, index, seg_length=60):
     for pair in resultDict:
         resultDict[pair][4] = resultDict[pair][0]/resultDict[pair][1]
         resultDict[pair] = [resultDict[pair][2],resultDict[pair][3],resultDict[pair][4]]# drop the total duration and freq
+    
+    # Default value if log is empty
+    classID = "Null"
 
+    if len(parsedFile.index) > 0: # If the dataframe isnt empty
+        # Infer class label from first line
+        classID = parsedFile.iloc[0]["class"] 
+    resultList = [] # Empty 2D array
+    for key, values in resultDict.items():
+        avg_duration = values[2]
+        longestDuration = values[0]
+        shortestDuration = values[1]
+
+        # Format the entry in the DataFrame
+        sublist =[key, float(avg_duration), float(longestDuration),float(shortestDuration), classID]
+        resultList.append(sublist)
+
+    # Return a Pandas DataFrame built from results
+    return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'longestDuration', 'shortestDuration', 'class'])
 
