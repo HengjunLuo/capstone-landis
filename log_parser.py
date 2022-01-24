@@ -189,7 +189,7 @@ def extract_mouse_clicks(parsedFile, index, seg_length=60):
     # Return a Pandas DataFrame built from results
     return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
 
-predefined_patterns = {'w':['s'], 's':['w'], 'd':['f'], 'f':['d']}
+predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q'], '1':['w']}
 def extract_predefined_patterns(parsedFile, index, seg_length=60):
 
     # Parse the file and get specified segment
@@ -218,8 +218,8 @@ def extract_predefined_patterns(parsedFile, index, seg_length=60):
                 # Check for the release-press pair
                 for pairedKey in predefined_patterns[key]:# check release-press pair for all paired keys for this key
                     if pairedKey in tempReleaseDict:# if we have the data for the required key release 
-                        # Validate a release-press pair by 2 metrics: 1. press time < release time. 2. (press time - release time) < 0.5 second
-                        if tempReleaseDict[pairedKey] < time and time - tempReleaseDict[pairedKey] <= 0.5:
+                        # Validate a release-press pair by 2 metrics: 1. press time < release time. 2. (press time - release time) < 0.3 second
+                        if tempReleaseDict[pairedKey] < time and time - tempReleaseDict[pairedKey] <= 0.3:
                             curr_duration = time - tempReleaseDict[pairedKey]# calculate duration for this release-press pair
                             resultKey = key + pairedKey # compute resultKey
                             if resultKey in resultDict:# if it's not the first record for resultKey
