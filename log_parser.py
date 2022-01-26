@@ -258,3 +258,69 @@ def extract_predefined_patterns(parsedFile, index, seg_length=60):
     # Return a Pandas DataFrame built from results
     return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'longestDuration', 'shortestDuration', 'class'])
 
+# Define pattern to be counted (currently set to rocket jump pattern)
+pattern = ['w', 'Key.ctrl_l', 'Key.space', 'left']
+
+# Start of Pattern_recognition function
+def pattern_recognition(parsedFile):
+
+    # Put full logfile into variable parsed_File (assuming we are sticking with full logfile rather than live classification, can be changed based on application)
+    parsedFile = parse_keyboard_log(parsedFile)
+
+    # Initialize number of patterns counted as 0
+    number_of_patterns = 0
+
+    # Initialize list of keys pressed, times they were pressed at, and the overall time the pattern took
+    list_of_keys_pressed = list()
+    list_of_times = list()
+    overall_times = list()
+
+    # For loop to put logfile values into list_of_keys_pressed and list_of_times
+    for _, row in parsedFile.iterrows():
+
+        # Get key and action and remove ' if needed
+        key = row['key']
+        key = key.replace("'", "")
+        action = row['action']
+        time = row['time']
+        
+
+        # Only concerned with keys pressed for current known patterns
+        if action == 'pressed':
+
+            # Append the key pressed and the time it was pressed on this row to the lists
+            list_of_keys_pressed.append(key)
+            list_of_times.append(time)
+
+    # Start of loop to figure out how many instances of the chosen pattern appear as well as to determine the average time and frequency of each instance of the pattern
+    for x in range(len(list_of_keys_pressed)):
+        
+        # Determining if the xth index in the list_of_keys_pressed is equal to the first element of the pattern
+        if list_of_keys_pressed[x] == pattern[0]:
+            
+            # storing the time that the first key in the pattern was pressed and storing the current index of list_of_keys_pressed
+            initial_time = list_of_times[x]
+            storage = x
+
+            # Start of loop to iterate through each element of the specified pattern to confirm that it has appeared in the logfile
+            for y in range(len(pattern)):
+                
+                # Break the loop if the current value in list_of_keys_pressed does not equal the current value in the pattern
+                if list_of_keys_pressed[storage] != pattern[y]:
+                    break
+                
+                # Determining if the last index in the pattern list has been reached
+                elif y == len(pattern)-1:
+                    
+                    # Increment the number of patterns seen by 1 and add the time it took to perform the pattern to the overall_times list
+                    number_of_patterns += 1
+                    overall_times.append(list_of_times[storage] - initial_time)
+
+                # Increment storage variable by 1 to be able to access the next element in the list_of_times list
+                storage += 1
+
+    # Calculation of average time and frequency it takes to perform the pattern
+    avg_time = sum(overall_times) / len(overall_times)
+    avg_freq = 1/avg_time
+
+    return number_of_patterns, avg_freq
