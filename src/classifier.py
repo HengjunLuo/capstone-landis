@@ -11,7 +11,7 @@ class LANDIS_classifier:
         self.target = target
         self.classifier_type = ct
         self.mostRecentPredictions = []
-        routing_file = open('.routing', 'r')
+        routing_file = open('../.routing', 'r')
         Lines = routing_file.readlines()
 
         # List of parsed logfiles

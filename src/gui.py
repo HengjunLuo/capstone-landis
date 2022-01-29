@@ -185,7 +185,7 @@ class LandisLogger(tk.Tk):
         self.configure_settings_widgets()
 
         # Set default log directory for keylogger
-        keylogger.set_log_directory(self.get_default_log_directory())
+        keylogger.set_log_directory('../' + self.get_default_log_directory())
 
 
     """
@@ -213,7 +213,7 @@ class LandisLogger(tk.Tk):
     """
     # Save user preferences
     def save_preferences(self):
-        with open('.preferences', 'w', encoding='utf-8') as f:
+        with open('../.preferences', 'w', encoding='utf-8') as f:
                 f.write("pausekey: " + self.pausekey + '\n')
                 f.write("log_dir: " + self.log_dir + '\n')
                 f.write("profile: " + self.curr_profile.get() + '\n')
@@ -222,11 +222,11 @@ class LandisLogger(tk.Tk):
     # Load user preferences
     def load_preferences(self):
         # Check that .preferences file exists
-        file = pathlib.Path('.preferences')
+        file = pathlib.Path('../.preferences')
         if file.exists():
             # If any of the following operations fail, delete .preferences
             try:
-                with open('.preferences', 'r', encoding='utf-8') as f:
+                with open('../.preferences', 'r', encoding='utf-8') as f:
                     data = f.readlines()
                     # First line, extract from 10th character to the newline
                     self.pausekey = data[0][10:-1]
@@ -242,17 +242,16 @@ class LandisLogger(tk.Tk):
 
     # Save logfile path to routing file
     def update_routing_table(self):
-        print(f"Using default directory: {'True' if self.use_default_dir.get() else 'False'}")
         if self.use_default_dir.get():
             # Read all lines from routing file and check for matches
-            with open('.routing', 'r', encoding='utf-8') as f:
+            with open('../.routing', 'r', encoding='utf-8') as f:
                         entries = f.readlines()
                         for entry in entries:
-                            if self.log_dir in entry:
+                            if self.get_default_log_directory() in entry:
                                 return # Found a match, exit method
             
             # Write logfile paths to routing file
-            with open('.routing', 'a', encoding='utf-8') as f:
+            with open('../.routing', 'a', encoding='utf-8') as f:
                     f.write('./' + self.get_default_log_directory() + mouselog_filename + '\n')
                     f.write('./' + self.get_default_log_directory() + keylog_filename + '\n')
 
@@ -301,7 +300,7 @@ class LandisLogger(tk.Tk):
         
         if self.use_default_dir.get():
             self.update_lbl_logdir()
-            keylogger.set_log_directory(self.get_default_log_directory())
+            keylogger.set_log_directory('../' + self.get_default_log_directory())
         
 
     def set_character(self, var, ix, op):
@@ -310,7 +309,7 @@ class LandisLogger(tk.Tk):
 
         if self.use_default_dir.get():
             self.update_lbl_logdir()
-            keylogger.set_log_directory(self.get_default_log_directory())
+            keylogger.set_log_directory('../' + self.get_default_log_directory())
         
 
     # Settings widget behavior

@@ -6,7 +6,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import VotingClassifier
 
-routing_file = open('.routing', 'r')
+routing_file = open('../.routing', 'r')
 Lines = routing_file.readlines()
 
 # List of parsed logfiles
