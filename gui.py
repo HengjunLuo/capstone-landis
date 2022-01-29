@@ -242,6 +242,7 @@ class LandisLogger(tk.Tk):
 
     # Save logfile path to routing file
     def update_routing_table(self):
+        print(f"Using default directory: {'True' if self.use_default_dir.get() else 'False'}")
         if self.use_default_dir.get():
             # Read all lines from routing file and check for matches
             with open('.routing', 'r', encoding='utf-8') as f:
@@ -252,8 +253,8 @@ class LandisLogger(tk.Tk):
             
             # Write logfile paths to routing file
             with open('.routing', 'a', encoding='utf-8') as f:
-                    f.write(self.log_dir + keylog_filename)
-                    f.write(self.log_dir + mouselog_filename)
+                    f.write('./' + self.get_default_log_directory() + mouselog_filename + '\n')
+                    f.write('./' + self.get_default_log_directory() + keylog_filename + '\n')
 
 
     def get_default_log_directory(self):
@@ -271,13 +272,13 @@ class LandisLogger(tk.Tk):
     def toggle_status(self, event):
         # State machine of toggle button
         if self.btn_toggle['text'] == "Start":
-            self.init_classifier()
+            #self.init_classifier() not today boys
             keylogger.start()
             self.btn_toggle['text'] = "Pause"
             self.btn_stop['state'] = 'normal'
             self.started = True
             self.check_status() # Start periodic status update checks
-            self.update_prediction()
+            #self.update_prediction() nope nope nope
         elif self.btn_toggle['text'] == "Pause":
             keylogger.pause()
             self.btn_toggle['text'] = "Resume"
@@ -396,7 +397,7 @@ class LandisLogger(tk.Tk):
 
 
     """
-    Method is called every 0.1s
+    Method is called every 0.1s (10x per sec)
     """
     def check_status(self):
         if keylogger.running == False:

@@ -128,15 +128,16 @@ def set_character(selection):
 Functions defining the specific formats in which inputs are logged
 """
 def log_move(x, y):
-    log_action( mouse_logger, "{0},None,None,{1}".format(f"{x:04},{y:04}", profile + character) )
+    log_action( mouse_logger, f"{x:04},{y:04},None,None,{profile + character}")
 
 def log_click(x, y, button, pressed):
     click_type = 'pressed' if pressed else 'released'
-    log_action( mouse_logger, "{0},{1},{2},{3}".format(f"{x:04},{y:04}", str(button)[7:], click_type, profile + character) )
+    log_action( mouse_logger, f"{x:04},{y:04},{str(button)[7:]},{click_type},{profile + character}")
+    log_action( keyboard_logger, f"Mouse.{str(button)[7:]},{click_type},{profile + character}")
 
 def log_scroll(x, y, dx, dy):
     scroll_dir = 'down' if dy < 0 else 'up'
-    log_action( mouse_logger, "{0},scroll,{1},{2}".format(f"{x:04},{y:04}", str(scroll_dir), profile + character) )
+    log_action( mouse_logger, f"{x:04},{y:04},scroll,{str(scroll_dir)},{profile + character}")
 
 def log_key_press(key):
     if str(key) == pause_keycode:
@@ -149,7 +150,7 @@ def log_key_press(key):
             str_key = 'Key.comma'
 
         if key not in pressed_keys:
-            log_action( keyboard_logger, "{0},pressed,{1}".format(str_key, profile + character) )
+            log_action( keyboard_logger, f"{str_key},pressed,{profile + character}")
             pressed_keys.add(key)
 
 def log_key_release(key):
@@ -159,7 +160,7 @@ def log_key_release(key):
         if str_key == "','":
             str_key = 'Key.comma'
             
-        log_action( keyboard_logger, "{0},released,{1}".format(str_key, profile + character) )
+        log_action( keyboard_logger, f"{str_key},released,{profile + character}")
         pressed_keys.discard(key)
 
 """    
