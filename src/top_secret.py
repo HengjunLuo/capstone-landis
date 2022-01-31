@@ -5,8 +5,9 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import VotingClassifier
+from sklearn.model_selection import train_test_split
 
-routing_file = open('../.routing', 'r')
+routing_file = open('.routing', 'r')
 Lines = routing_file.readlines()
 
 # List of parsed logfiles
@@ -20,18 +21,17 @@ for line in Lines:
     elif 'mouse.log' in line:
         mouse.append(parse_mouse_log(line))
 
-# Split into train and test sets
-X_train = []
-X_test = []
-Y_train = []
-Y_test = []
-# 30 second segments fuggetaboutit
-train_seg_length = 30
-test_seg_length = 30
+# 60 second segments fuggetaboutit
+train_seg_length = 60
+test_seg_length = 60
 # The quintessential target class
-target = "HENSOL"
+target = "MARSOL"
 
-for k in range(len(keyboard) - 1):
+# Empty lists for inserting data
+X_actual = []
+Y_actual = []
+
+for k in range(len(keyboard)):
     for i in range(int(keyboard[k].time.iloc[-1] / train_seg_length)):
         # For each segment in each logfile
         # Create a heatmap for that segment
@@ -39,19 +39,10 @@ for k in range(len(keyboard) - 1):
         heatmap = heatmap.to_binary_class_label(target)
         # If the heatmap isn't blank
         if heatmap.class_label() != 'Null':
-            X_train.append(heatmap.heatmap_data().ravel().tolist())
-            Y_train.append(heatmap.class_label())
+            X_actual.append(heatmap.heatmap_data().ravel().tolist())
+            Y_actual.append(heatmap.class_label())
 
-for k in range(len(keyboard) - 1,len(keyboard)):
-    for i in range(int(keyboard[k].time.iloc[-1] / test_seg_length)):
-        # For each segment in each logfile
-        # Create a heatmap for that segment
-        heatmap = KeyboardHeatmap(keyboard[k], i, test_seg_length)
-        heatmap = heatmap.to_binary_class_label(target)
-        # If the heatmap isn't blank
-        if heatmap.class_label() != 'Null':
-            X_test.append(heatmap.heatmap_data().ravel().tolist())
-            Y_test.append(heatmap.class_label())
+X_train, X_test, Y_train, Y_test = train_test_split(X_actual, Y_actual, random_state=0)
 
 # ensemble of models
 estimator = []
@@ -61,11 +52,6 @@ estimator.append(('RF', RandomForestClassifier(
     max_features= 'sqrt',
     n_estimators = 100, 
     oob_score = True)))
-estimator.append(('MLP', MLPClassifier(
-    hidden_layer_sizes=(100,100), 
-    activation='relu', 
-    solver='adam', 
-    max_iter=10000)))
 estimator.append(('KNN', KNeighborsClassifier(
     n_neighbors=5 # we dont talk about this number
     )))
@@ -87,10 +73,6 @@ print( f"Hard Train score: {vot_hard.score(X_train, Y_train)} " + f"Hard Test sc
 rfc = RandomForestClassifier(n_jobs=-1, criterion='gini', max_features= 'sqrt', n_estimators = 100, oob_score = True) 
 rfc.fit(X_train, Y_train)
 print( f"RFC Train score: {rfc.score(X_train, Y_train)} " + f"RFC Test score: {rfc.score(X_test, Y_test)}")
-
-mlp = MLPClassifier(hidden_layer_sizes=(100,100), activation='relu', solver='adam', max_iter=10000)
-mlp.fit(X_train, Y_train)
-print( f"MLP Train score: {mlp.score(X_train, Y_train)} " + f"MLP Test score: {mlp.score(X_test, Y_test)}")
 
 knn = KNeighborsClassifier(n_neighbors=5)
 knn.fit(X_train, Y_train)
