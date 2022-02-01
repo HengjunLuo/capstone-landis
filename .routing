@@ -28,3 +28,7 @@
 ./logs/JON/SOL/key.log
 ./logs/JON/PYR/mouse.log
 ./logs/JON/PYR/key.log
+./logs/MIT/SNI/mouse.log
+./logs/MIT/SNI/key.log
+./logs/MIT/SCO/mouse.log
+./logs/MIT/SCO/key.log
