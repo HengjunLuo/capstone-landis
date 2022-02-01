@@ -46,7 +46,7 @@ class KeyboardHeatmap:
         if len(self.keyboard_df.index) > 0:
             # Infer class_label from first line of data
             self.class_label_ = self.keyboard_df['class'].iloc[0]
-            #self.class_label_ = self.class_label_[:3]#Only use player label
+            self.class_label_ = self.class_label_[:3]#Only use player label
 
         # Set key column to index (unique values)
         self.keyboard_df.set_index('key', inplace=True)
