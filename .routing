@@ -1,9 +1,9 @@
-./logs/JON/SPY/mouse.log
-./logs/JON/SPY/key.log
 ./logs/JON/SOL/mouse.log
 ./logs/JON/SOL/key.log
 ./logs/JON/PYR/mouse.log
 ./logs/JON/PYR/key.log
+./logs/JON/SPY/mouse.log
+./logs/JON/SPY/key.log
 ./logs/MIT/SOL/mouse.log
 ./logs/MIT/SOL/key.log
 ./logs/MIT/SNI/mouse.log
