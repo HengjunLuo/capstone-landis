@@ -14,7 +14,7 @@ showing each keys frequency and duration during the specified segment
 class KeyboardHeatmap:
 
     # Class attribute
-    # The 49 default key bindings for team fortress 2 + mouse buttons
+    # The 23 default key bindings for team fortress 2 + mouse buttons = 25 in total
     keyBindings = ["w","a","s","d",
                 "Key.space",
                 "Key.ctrl_l",
@@ -76,8 +76,8 @@ class KeyboardHeatmap:
     """
     def show_heatmap(self):
 
-        a1 = self.arrFreq.reshape((1, 25))
-        a2 = self.arrDura.reshape((1, 25))
+        a1 = self.arrFreq.reshape((1, 51))
+        a2 = self.arrDura.reshape((1, 51))
         a3 = np.append(a1, a2, axis=1)
 
         plt.figure(figsize=(8, 4))
@@ -89,11 +89,14 @@ class KeyboardHeatmap:
     Return the heatmap as a numpy array for feature input
     """
     def heatmap_data(self):
-        a1 = self.arrFreq.reshape((1, 25))
-        a2 = self.arrDura.reshape((1, 25))
-        a3 = self.flightAvgDura.reshape((1,10))
-        a4 = self.flightShortestDura.reshape((1,10))
-        a5 = self.flightLongestDura.reshape((1,10))
+        a1 = self.arrFreq.reshape((1, len(self.keyBindings)))
+        a2 = self.arrDura.reshape((1, len(self.keyBindings)))
+        flightLen = 0
+        for aDict in self.predefined_patterns:
+            flightLen += len(self.predefined_patterns(aDict))
+        a3 = self.flightAvgDura.reshape((1,flightLen))
+        a4 = self.flightShortestDura.reshape((1,flightLen))
+        a5 = self.flightLongestDura.reshape((1,flightLen))
 
         result = np.append(a1, a2, axis=1)
         result = np.append(result, a3, axis=1)
