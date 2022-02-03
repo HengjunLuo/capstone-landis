@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 from log_parser import extract_keyboard_features
 from log_parser import extract_mouse_clicks
+from log_parser import extract_predefined_patterns
 
 """
 KeyboardHeatmap class takes a segment from a parsed file generated from a 
@@ -13,8 +14,7 @@ showing each keys frequency and duration during the specified segment
 class KeyboardHeatmap:
 
     # Class attribute
-    # The 49 default key bindings for team fortress 2
-     # The 49 default key bindings for team fortress 2
+    # The 49 default key bindings for team fortress 2 + mouse buttons
     keyBindings = ["w","a","s","d",
                 "Key.space",
                 "Key.ctrl_l",
@@ -23,6 +23,12 @@ class KeyboardHeatmap:
                 "1","2","3","4","5","6","7","8","9","0",
                 "Key.tab",
                 "Mouse.left","Mouse.right"]
+    predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q'], '1':['w']}
+    flightTimePatterns = []
+    for item in predefined_patterns:
+        for subItem in predefined_patterns[item]:
+            combineKey = item + subItem
+            flightTimePatterns.append(combineKey)
 
     """
     Construct the heatmap object by passing it a pandas dataframe
@@ -34,6 +40,7 @@ class KeyboardHeatmap:
         
         # Extract frequency and duration data from segment
         self.keyboard_df = extract_keyboard_features(dataframe, index, seg_length)
+        self.flightTime_df = extract_predefined_patterns(dataframe, index, seg_length)
         self.class_label_ = "Null"
         # Check that data is not empty
         if len(self.keyboard_df.index) > 0:
@@ -43,10 +50,14 @@ class KeyboardHeatmap:
 
         # Set key column to index (unique values)
         self.keyboard_df.set_index('key', inplace=True)
+        self.flightTime_df.set_index('key', inplace=True)
 
         # Create np arrays initialized with 0s the same shape as the keybindings list
         self.arrFreq = np.zeros_like(KeyboardHeatmap.keyBindings, dtype=float)
         self.arrDura = np.zeros_like(KeyboardHeatmap.keyBindings, dtype=float)
+        self.flightAvgDura = np.zeros_like(KeyboardHeatmap.flightTimePatterns, dtype=float)
+        self.flightShortestDura = np.zeros_like(KeyboardHeatmap.flightTimePatterns, dtype=float)
+        self.flightLongestDura = np.zeros_like(KeyboardHeatmap.flightTimePatterns, dtype=float)
 
         # For each entry in the DataFrame, insert data into arrays
         for key in KeyboardHeatmap.keyBindings:
@@ -54,6 +65,11 @@ class KeyboardHeatmap:
                 self.arrFreq[KeyboardHeatmap.keyBindings.index(key)] = self.keyboard_df.freq[key]
                 self.arrDura[KeyboardHeatmap.keyBindings.index(key)] = self.keyboard_df.avg_duration[key]
 
+        for key in KeyboardHeatmap.flightTimePatterns:
+            if key in self.flightTime_df.index:
+                self.flightAvgDura[KeyboardHeatmap.flightTimePatterns.index(key)] = self.flightTime_df.avg_duration[key]
+                self.flightShortestDura[KeyboardHeatmap.flightTimePatterns.index(key)] = self.flightTime_df.shortestDuration[key]
+                self.flightLongestDura[KeyboardHeatmap.flightTimePatterns.index(key)] = self.flightTime_df.longestDuration[key]
 
     """
     Display the heatmap of specified segment
@@ -75,6 +91,14 @@ class KeyboardHeatmap:
     def heatmap_data(self):
         a1 = self.arrFreq.reshape((1, 25))
         a2 = self.arrDura.reshape((1, 25))
+        a3 = self.flightAvgDura.reshape((1,10))
+        a4 = self.flightShortestDura.reshape((1,10))
+        a5 = self.flightLongestDura.reshape((1,10))
+
+        result = np.append(a1, a2, axis=1)
+        result = np.append(result, a3, axis=1)
+        result = np.append(result, a4, axis=1)
+        result = np.append(result, a5, axis=1)
         return np.append(a1, a2, axis=1)
 
     """
