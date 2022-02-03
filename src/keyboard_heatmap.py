@@ -21,7 +21,8 @@ class KeyboardHeatmap:
                 "Key.comma",".",
                 "q", "v", "b", "r",
                 "1","2","3","4","5","6","7","8","9","0",
-                "Key.tab"]
+                "Key.tab",
+                "Mouse.left","Mouse.right"]
 
     """
     Construct the heatmap object by passing it a pandas dataframe
@@ -59,8 +60,8 @@ class KeyboardHeatmap:
     """
     def show_heatmap(self):
 
-        a1 = self.arrFreq.reshape((1, 23))
-        a2 = self.arrDura.reshape((1, 23))
+        a1 = self.arrFreq.reshape((1, 25))
+        a2 = self.arrDura.reshape((1, 25))
         a3 = np.append(a1, a2, axis=1)
 
         plt.figure(figsize=(8, 4))
@@ -72,8 +73,8 @@ class KeyboardHeatmap:
     Return the heatmap as a numpy array for feature input
     """
     def heatmap_data(self):
-        a1 = self.arrFreq.reshape((1, 23))
-        a2 = self.arrDura.reshape((1, 23))
+        a1 = self.arrFreq.reshape((1, 25))
+        a2 = self.arrDura.reshape((1, 25))
         return np.append(a1, a2, axis=1)
 
     """
@@ -83,8 +84,8 @@ class KeyboardHeatmap:
     def heatmap_data_names():
         frequency_names = np.array([key+'_frequency' for key in KeyboardHeatmap.keyBindings])
         duration_names = np.array([key+'_duration' for key in KeyboardHeatmap.keyBindings])
-        a1 = frequency_names.reshape((1, 23))
-        a2 = duration_names.reshape((1, 23))
+        a1 = frequency_names.reshape((1, 25))
+        a2 = duration_names.reshape((1, 25))
         return np.append(a1, a2, axis=1).ravel()
     
     """

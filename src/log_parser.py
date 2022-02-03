@@ -59,7 +59,9 @@ keyBindings = ["w","a","s","d",
                 "Key.comma",".",
                 "q", "v", "b", "r",
                 "1","2","3","4","5","6","7","8","9","0",
-                "Key.tab"]
+                "Key.tab",
+                "Mouse.left","Mouse.right"]
+
 
 def extract_keyboard_features(parsedFile, index, seg_length=60):
 
