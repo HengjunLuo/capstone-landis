@@ -1,5 +1,3 @@
-from cmath import nan
-from numpy import NaN
 import pandas as pd
 
 """
