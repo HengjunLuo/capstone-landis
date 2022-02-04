@@ -91,18 +91,15 @@ class KeyboardHeatmap:
     def heatmap_data(self):
         a1 = self.arrFreq.reshape((1, len(self.keyBindings)))
         a2 = self.arrDura.reshape((1, len(self.keyBindings)))
-        flightLen = 0
-        for aDict in self.predefined_patterns:
-            flightLen += len(self.predefined_patterns(aDict))
-        a3 = self.flightAvgDura.reshape((1,flightLen))
-        a4 = self.flightShortestDura.reshape((1,flightLen))
-        a5 = self.flightLongestDura.reshape((1,flightLen))
+        a3 = self.flightAvgDura.reshape((1,len(self.flightTimePatterns)))
+        a4 = self.flightShortestDura.reshape((1,len(self.flightTimePatterns)))
+        a5 = self.flightLongestDura.reshape((1,len(self.flightTimePatterns)))
 
         result = np.append(a1, a2, axis=1)
         result = np.append(result, a3, axis=1)
         result = np.append(result, a4, axis=1)
         result = np.append(result, a5, axis=1)
-        return np.append(a1, a2, axis=1)
+        return result
 
     """
     Return the heatmap data as column names in ravel()ed heatmap order
@@ -111,9 +108,19 @@ class KeyboardHeatmap:
     def heatmap_data_names():
         frequency_names = np.array([key+'_frequency' for key in KeyboardHeatmap.keyBindings])
         duration_names = np.array([key+'_duration' for key in KeyboardHeatmap.keyBindings])
+        flight_time_avg_names = np.array([key+'_avg_duration' for key in KeyboardHeatmap.flightTimePatterns])
+        flight_time_shortest_names = np.array([key+'_shortest_duration' for key in KeyboardHeatmap.flightTimePatterns])
+        flight_time_longest_names = np.array([key+'_longest_duration' for key in KeyboardHeatmap.flightTimePatterns])
         a1 = frequency_names.reshape((1, 25))
         a2 = duration_names.reshape((1, 25))
-        return np.append(a1, a2, axis=1).ravel()
+        a3 = flight_time_avg_names.reshape((1,len(KeyboardHeatmap.flightTimePatterns)))
+        a4 = flight_time_shortest_names.reshape((1,len(KeyboardHeatmap.flightTimePatterns)))
+        a5 = flight_time_longest_names.reshape((1,len(KeyboardHeatmap.flightTimePatterns)))
+        result = np.append(a1, a2, axis=1)
+        result = np.append(result, a3, axis=1)
+        result = np.append(result, a4, axis=1)
+         
+        return np.append(result, a5, axis=1).ravel()
     
     """
     Return the class that the heatmap data belongs to
