@@ -1,5 +1,7 @@
 from log_parser import parse_keyboard_log
 from log_parser import parse_mouse_log
+import tap_durations
+
 from keyboard_heatmap import KeyboardHeatmap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
@@ -12,14 +14,14 @@ class LANDIS_classifier:
         self.target = target
         self.classifier_type = ctype
         self.mostRecentPredictions = []
-
+    
         # List of parsed logfiles
         keyboard = []
         mouse = []
 
         # Read logfile paths from .routing
         log_paths = None
-        with open("../.routing", 'r', encoding='utf-8') as f:
+        with open(".routing", 'r', encoding='utf-8') as f:
             log_paths = f.read().splitlines()   # Read lines without '\n's
 
         # Append each parsed log file to the appropriate list
@@ -31,7 +33,6 @@ class LANDIS_classifier:
 
         X_train = []  # List of segment heatmaps used for training
         y_train = []  # List of true or false labels based on current target
-
         # For each parsed keyboard file
         for kb_parsed in keyboard:
             # Get number of seg_length length segments from parsed log
@@ -66,17 +67,27 @@ class LANDIS_classifier:
         
         self.classifier.fit(X_train, y_train)
     
+
     # Currently only uses keyboard file, will eventually have to use mouse
-    # filepath as argument is a little convoluted, we are reading csv that is currently being written to
-    # getting dataframe from input_logger would be better
-    def predict(self, session_data):
+    def predict(self, session_data, seglength):
         # Return if no data for prediction
         if session_data.empty:
-            return "---"
+            return 0
 
-        heatmap = KeyboardHeatmap(session_data, 0, session_data.time.iloc[-1])
+        # Isolate inputs from last [seglength] seconds
+        last_timestamp = session_data.time.iloc[-1]
+        kb_session_seg = session_data[session_data.time > (last_timestamp - seglength)]
+
+        heatmap = KeyboardHeatmap(kb_session_seg, 0, last_timestamp)
         heatmap = heatmap.to_binary_class_label(self.target)
-        
+
+        classifier_verificaiton = int(self.classifier.predict(heatmap.heatmap_data())[0])
+
+        profile = str(session_data['class'].iloc[0])[:3]
+        tap_verification = tap_durations.verify_session(session_data, profile)
+
+        return (classifier_verificaiton + tap_verification) / 2
+        """
         if heatmap.class_label() != 'Null':
             if len(self.mostRecentPredictions) < 2: 
                 self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
@@ -118,3 +129,5 @@ class LANDIS_classifier:
                 return self.mostRecentPredictions
         else:
             return "---"
+        """
+

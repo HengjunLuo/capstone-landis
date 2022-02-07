@@ -38,19 +38,19 @@ class MouseAction:
 
 # Dicts of recorded input actions (basically the entire log but in RAM)
 session_kb = {
-    'time': [],
-    'key':       [],
-    'action':    [],
-    'profile':   []
+    'time':   [],
+    'key':    [],
+    'action': [],
+    'class':  []
 }
 
 session_ms = {
-    'time': [],
-    'x':         [],
-    'y':         [],
-    'button':    [],
-    'action':    [],
-    'profile':   []
+    'time':   [],
+    'x':      [],
+    'y':      [],
+    'button': [],
+    'action': [],
+    'class':  []
 }
 
 # Pause key code
@@ -95,19 +95,19 @@ def start():
 
     # Reset recorded session data
     session_kb = {
-        'time': [],
-        'key':       [],
-        'action':    [],
-        'profile':   []
+        'time':   [],
+        'key':    [],
+        'action': [],
+        'class':  []
     }
 
     session_ms = {
-        'time': [],
-        'x':         [],
-        'y':         [],
-        'button':    [],
-        'action':    [],
-        'profile':   []
+        'time':   [],
+        'x':      [],
+        'y':      [],
+        'button': [],
+        'action': [],
+        'class':  []
     }
 
     # Create new event listener threads
@@ -217,25 +217,25 @@ def save_log():
     keybd_df.to_csv(
         log_dir + keylog_filename,
         float_format="{:.4f}".format,
-        header=False
+        header=False,
+        index=False
     )
 
     mouse_df.to_csv(
         log_dir + mouselog_filename,
         float_format="{:.4f}".format,
-        header=False
+        header=False,
+        index=False
     )
 
 
 # Get session dataframes
-def get_session_dataframe(type):
+def get_session_dataframe(type = 'keyboard'):
     df = None
     if type == 'keyboard':
-        keybd_df = pd.DataFrame(session_kb)
-        keybd_df.set_index('time', inplace=True)
+        df = pd.DataFrame(session_kb)
     elif type == 'mouse':
-        mouse_df = pd.DataFrame(session_ms)
-        mouse_df.set_index('time', inplace=True)
+        df = pd.DataFrame(session_ms)
     return df
 
 
@@ -303,12 +303,12 @@ def log_action(action):
             session_kb['time'].append(action.time)
             session_kb['key'].append(action.key)
             session_kb['action'].append(action.action)
-            session_kb['profile'].append(action.profile + action.character)
+            session_kb['class'].append(action.profile + action.character)
         elif type(action) is MouseAction:
             session_ms['time'].append(action.time)
             session_ms['x'].append(action.x)
             session_ms['y'].append(action.y)
             session_ms['button'].append(action.button)
             session_ms['action'].append(action.action)
-            session_ms['profile'].append(action.profile + action.character)
+            session_ms['class'].append(action.profile + action.character)
     
