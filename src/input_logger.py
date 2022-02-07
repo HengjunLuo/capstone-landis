@@ -18,8 +18,8 @@ import re
 # Convenience structs to clarify code
 # Object containing keyboard action information
 class KeyboardAction:
-    def __init__(self, timestamp, key, action, profile, character):
-        self.timestamp = timestamp
+    def __init__(self, time, key, action, profile, character):
+        self.time = time
         self.key = key
         self.action = action
         self.profile = profile
@@ -27,8 +27,8 @@ class KeyboardAction:
 
 # Object containing mouse action information
 class MouseAction:
-    def __init__(self, timestamp, x, y, button, action, profile, character):
-        self.timestamp = timestamp
+    def __init__(self, time, x, y, button, action, profile, character):
+        self.time = time
         self.x = x
         self.y = y
         self.button = button
@@ -38,14 +38,14 @@ class MouseAction:
 
 # Dicts of recorded input actions (basically the entire log but in RAM)
 session_kb = {
-    'timestamp': [],
+    'time': [],
     'key':       [],
     'action':    [],
     'profile':   []
 }
 
 session_ms = {
-    'timestamp': [],
+    'time': [],
     'x':         [],
     'y':         [],
     'button':    [],
@@ -95,14 +95,14 @@ def start():
 
     # Reset recorded session data
     session_kb = {
-        'timestamp': [],
+        'time': [],
         'key':       [],
         'action':    [],
         'profile':   []
     }
 
     session_ms = {
-        'timestamp': [],
+        'time': [],
         'x':         [],
         'y':         [],
         'button':    [],
@@ -209,9 +209,9 @@ def save_log():
 
     # Create dataframes
     keybd_df = pd.DataFrame(session_kb)
-    keybd_df.set_index('timestamp', inplace=True)
+    keybd_df.set_index('time', inplace=True)
     mouse_df = pd.DataFrame(session_ms)
-    mouse_df.set_index('timestamp', inplace=True)
+    mouse_df.set_index('time', inplace=True)
     
     # Save dataframes to file
     keybd_df.to_csv(
@@ -232,10 +232,10 @@ def get_session_dataframe(type):
     df = None
     if type == 'keyboard':
         keybd_df = pd.DataFrame(session_kb)
-        keybd_df.set_index('timestamp', inplace=True)
+        keybd_df.set_index('time', inplace=True)
     elif type == 'mouse':
         mouse_df = pd.DataFrame(session_ms)
-        mouse_df.set_index('timestamp', inplace=True)
+        mouse_df.set_index('time', inplace=True)
     return df
 
 
@@ -300,12 +300,12 @@ Make the script more readable and less error-prone
 def log_action(action):
     if not paused:
         if type(action) is KeyboardAction:
-            session_kb['timestamp'].append(action.timestamp)
+            session_kb['time'].append(action.time)
             session_kb['key'].append(action.key)
             session_kb['action'].append(action.action)
             session_kb['profile'].append(action.profile + action.character)
         elif type(action) is MouseAction:
-            session_ms['timestamp'].append(action.timestamp)
+            session_ms['time'].append(action.time)
             session_ms['x'].append(action.x)
             session_ms['y'].append(action.y)
             session_ms['button'].append(action.button)
