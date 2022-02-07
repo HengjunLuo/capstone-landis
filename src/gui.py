@@ -289,6 +289,7 @@ class LandisLogger(tk.Tk):
     def stop_keylogger(self, event):
         # Stop keylogger
         keylogger.stop()
+        keylogger.save_log() # test
         self.btn_toggle['text'] = "Start"
         self.btn_stop['state'] = 'disabled'
         self.update_lbl_status("Stopped")
