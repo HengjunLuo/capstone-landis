@@ -87,8 +87,28 @@ keyboard_listener = None
 
 # Start threads (more importantly start the counter)
 def start():
-    global mouse_listener, keyboard_listener, logging_start_time, running, paused
+    global mouse_listener, keyboard_listener
+    global logging_start_time, running, paused
+    global session_kb, session_ms
+
     logging_start_time = time.perf_counter()
+
+    # Reset recorded session data
+    session_kb = {
+        'timestamp': [],
+        'key':       [],
+        'action':    [],
+        'profile':   []
+    }
+
+    session_ms = {
+        'timestamp': [],
+        'x':         [],
+        'y':         [],
+        'button':    [],
+        'action':    [],
+        'profile':   []
+    }
 
     # Create new event listener threads
     mouse_listener = mouse.Listener(
@@ -110,11 +130,11 @@ def start():
 def stop():
     global running, paused
 
-    mouse_listener.stop()
-    keyboard_listener.stop()
-
     running = False
     paused = False
+
+    mouse_listener.stop()
+    keyboard_listener.stop()
 
 
 # Set pause flag true (stop logging)

@@ -146,9 +146,10 @@ class LandisLogger(tk.Tk):
         self.elapsed_time.set("00m 00s")
 
         # Create widgets
-        self.lbl_running = tk.Label(self.frm_status, width=25, font=("Helvetica", 11, "bold"))
-        self.btn_toggle = tk.Button(self.frm_status, text="Start", width=7)
-        self.btn_stop = tk.Button(self.frm_status, text="Stop", state='disabled', width=7)
+        self.lbl_running = tk.Label(self.frm_status, width=25, font=('Helvetica', 11, 'bold'))
+        self.btn_toggle = tk.Button(self.frm_status, text='Start', width=7)
+        self.btn_stop   = tk.Button(self.frm_status, text='Stop',  width=7, state='disabled')
+        self.btn_save   = tk.Button(self.frm_status, text='Save',  width=7, state='disabled')
 
         self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
         self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=6)
@@ -275,6 +276,7 @@ class LandisLogger(tk.Tk):
             keylogger.start()
             self.btn_toggle['text'] = "Pause"
             self.btn_stop['state'] = 'normal'
+            self.btn_save['state'] = 'disabled'
             self.started = True
             self.check_status() # Start periodic status update checks
             #self.update_prediction() nope nope nope
@@ -289,11 +291,14 @@ class LandisLogger(tk.Tk):
     def stop_keylogger(self, event):
         # Stop keylogger
         keylogger.stop()
-        keylogger.save_log() # test
         self.btn_toggle['text'] = "Start"
         self.btn_stop['state'] = 'disabled'
+        self.btn_save['state'] = 'normal'
         self.update_lbl_status("Stopped")
         self.update_routing_table()
+
+    def save_log(self, event):
+        keylogger.save_log()
 
     def set_profile(self, var, ix, op):
         keylogger.set_profile(self.curr_profile.get())
@@ -457,6 +462,7 @@ class LandisLogger(tk.Tk):
 
         self.btn_toggle.grid(row=2, column=3, padx=1)
         self.btn_stop.grid(row=3, column=3, padx=1)
+        self.btn_save.grid(row=4, column=3, padx=1)
 
         self.lbl_profile.grid(row=2, column=0, sticky='e')
         self.btn_profile.grid(row=2, column=1, padx=5, sticky='e')
@@ -473,6 +479,7 @@ class LandisLogger(tk.Tk):
         # Assign settings widget behavior
         self.btn_toggle.bind('<Button-1>', self.toggle_status)
         self.btn_stop.bind('<Button-1>', self.stop_keylogger)
+        self.btn_save.bind('<Button-1>', self.save_log)
         self.curr_profile.trace('w', self.set_profile)
         self.curr_character.trace('w', self.set_character)
 
