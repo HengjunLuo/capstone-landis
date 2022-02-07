@@ -199,15 +199,30 @@ class LandisLogger(tk.Tk):
         # Training takes a few seconds, so we dont want to call it every time a gui option is changed
         # For now, we will call it when user selects start
         training_segment_length = 100
-        self.classifier = classifier.LANDIS_classifier(self.curr_method.get(), self.curr_profile.get()+self.curr_character.get(), training_segment_length)
+        self.classifier = classifier.LANDIS_classifier(
+            self.curr_method.get(), 
+            self.curr_profile.get() + self.curr_character.get(), 
+            training_segment_length
+        )
 
     
-    def update_prediction(self):
-        # Ideally we would have access to a dataframe that is being updates to by input_logger.py
-        # For now this inefficient method will work
+    def update_prediction(self, seglength):
         if keylogger.running:
-            self.curr_prediction.set(self.classifier.predict(self.lbl_log_dir['text']))
-            self.after(60000, self.update_prediction) # Run this function every 60s
+            # Get the current session data as a DataFrame
+            session_data = keylogger.get_session_dataframe('keyboard')
+
+            # Isolate inputs from last [seglength] seconds
+            last_timestamp = session_data.time.iloc[-1]
+            kb_session_seg = session_data[session_data.time > last_timestamp - seglength]
+
+            # Get predictions
+            predictions = self.classifier.predict(kb_session_seg)
+
+            # Update predictions in gui
+            self.curr_prediction.set(predictions)
+
+            # Re-run this function every 60000ms (60s)
+            self.after(seglength * 1000, self.update_prediction)
 
     """
     File persistence methods
@@ -272,17 +287,19 @@ class LandisLogger(tk.Tk):
     def toggle_status(self, event):
         # State machine of toggle button
         if self.btn_toggle['text'] == "Start":
-            #self.init_classifier() not today boys
+            self.init_classifier()
             keylogger.start()
             self.btn_toggle['text'] = "Pause"
             self.btn_stop['state'] = 'normal'
             self.btn_save['state'] = 'disabled'
             self.started = True
-            self.check_status() # Start periodic status update checks
-            #self.update_prediction() nope nope nope
+            self.check_status()        # Start periodic status update checks
+            self.update_prediction(60) # Start periodic predictions every 60s
+
         elif self.btn_toggle['text'] == "Pause":
             keylogger.pause()
             self.btn_toggle['text'] = "Resume"
+            
         elif self.btn_toggle['text'] == "Resume":
             keylogger.resume()
             self.update_lbl_status("Running")
