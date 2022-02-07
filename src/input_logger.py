@@ -10,26 +10,57 @@ Considerations:
 """
 
 from pynput import mouse, keyboard
+import pandas as pd
 import time
-import logging
 import re
-import random
 
-# Escape key code
+
+# Convenience structs to clarify code
+# Object containing keyboard action information
+class KeyboardAction:
+    def __init__(self, timestamp, key, action, profile, character):
+        self.timestamp = timestamp
+        self.key = key
+        self.action = action
+        self.profile = profile
+        self.character = character
+
+# Object containing mouse action information
+class MouseAction:
+    def __init__(self, timestamp, x, y, button, action, profile, character):
+        self.timestamp = timestamp
+        self.x = x
+        self.y = y
+        self.button = button
+        self.action = action
+        self.profile = profile
+        self.character = character
+
+# Dicts of recorded input actions (basically the entire log but in RAM)
+session_kb = {
+    'timestamp': [],
+    'key':       [],
+    'action':    [],
+    'profile':   []
+}
+
+session_ms = {
+    'timestamp': [],
+    'x':         [],
+    'y':         [],
+    'button':    [],
+    'action':    [],
+    'profile':   []
+}
+
+# Pause key code
 # A widely used option is the grave key
 # Alt+` " ` " is also the button for " ~ ". Should be the button above tab
 pause_keycode = r"'`'"
-# Code for ctrl+c
-#pause_keycode = r"'\x03'"
 
 # Keep track of logger state
 running = False
 paused = False
-
-# Declare loggers
-mouse_logger = None
-keyboard_logger = None
-logname = 0 # Increments for each new log
 
 # Keep track of logging time
 logging_start_time = 0
@@ -44,45 +75,68 @@ mouselog_filename = "mouse.log"
 profile = "---"
 character = "---"
 
-# Keep track of currently pressed keys (remove repeated presses)
+# Keep track of currently pressed keys (ignore held repeated presses)
 pressed_keys = set()
 
-"""
-Logging mechanism:
-    Record all keystrokes to "key.log"
-    Record all mouse actions to "mouse.log"
-    Records are logged as csv files for easy parsing
-    Overwrites existing log files in save location
-"""
-def setup_logger(name, log_filename):
-    # File handler manages i/o to the logfile
-    handler = logging.FileHandler(log_filename, mode='w')
-    
-    # This line determines the general log format ([elapsed time]: [action])
-    handler.setFormatter(logging.Formatter('%(elapsed_time).4f,%(message)s')) # the '.4' determines how many decimal places to log
+# Declare listeners
+mouse_listener = None
+keyboard_listener = None
 
-    # Initialize the logger and attach the handler
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
-    logger.addHandler(handler)
-    
-    return logger
 
-# Initialize loggers and create logging files
-def create_loggers():
-    global mouse_logger, keyboard_logger, logname
+# --------------------------- Public Interface ------------------------------- #
 
-    # Reset loggers if logger is being re-started
-    mouse_logger = None
-    keyboard_logger = None
+# Start threads (more importantly start the counter)
+def start():
+    global mouse_listener, keyboard_listener, logging_start_time, running, paused
+    logging_start_time = time.perf_counter()
 
-    # Create keyboard logger and increment name
-    keyboard_logger = setup_logger(str(logname), log_dir + keylog_filename)
-    logname += 1 # Ensure unique names
+    # Create new event listener threads
+    mouse_listener = mouse.Listener(
+        on_move=log_move,
+        on_click=log_click,
+        on_scroll=log_scroll)
+    keyboard_listener = keyboard.Listener(
+        on_press=log_key_press,
+        on_release=log_key_release)
 
-    # Create mouse logger and increment name
-    mouse_logger = setup_logger(str(logname), log_dir + mouselog_filename)
-    logname += 1 # Ensure unique names
+    mouse_listener.start()
+    keyboard_listener.start()
+
+    running = True
+    paused = False
+
+
+# Stop listener threads
+def stop():
+    global running, paused
+
+    mouse_listener.stop()
+    keyboard_listener.stop()
+
+    running = False
+    paused = False
+
+
+# Set pause flag true (stop logging)
+def pause():
+    global paused, pause_time
+    paused = True
+    pause_time = time.perf_counter()
+
+
+# Set pause flag to false and continue logging
+def resume():
+    global paused, logging_start_time
+    paused = False
+    logging_start_time += (time.perf_counter() - pause_time)
+
+
+# Get the amount of time the logger has been active for
+def elapsed_time():
+    if not paused:
+        return time.perf_counter() - logging_start_time
+    else:
+        return pause_time - logging_start_time
 
 
 # Change directory where logs are saved
@@ -91,7 +145,19 @@ def set_log_directory(new_dir):
     log_dir = new_dir
 
 
-# Change the pause key
+# Set logging profile
+def set_profile(selection):
+    global profile
+    profile = selection
+
+
+# Set logging character
+def set_character(selection):
+    global character
+    character = selection
+
+
+# Set the key used to pause the logger
 def set_pause_key(key):
     global pause_keycode
 
@@ -116,33 +182,74 @@ def set_pause_key(key):
     else:
         pause_keycode = f"Key.{key.lower()}"
 
-def set_profile(selection):
-    global profile
-    profile = selection
 
-def set_character(selection):
-    global character
-    character = selection
+# Save recorded data to logfile
+def save_log():
+    global mouse_logger, keyboard_logger
+
+    # Create dataframes
+    keybd_df = pd.DataFrame(session_kb)
+    keybd_df.set_index('timestamp', inplace=True)
+    mouse_df = pd.DataFrame(session_ms)
+    mouse_df.set_index('timestamp', inplace=True)
+    
+    # Save dataframes to file
+    keybd_df.to_csv(
+        log_dir + keylog_filename,
+        float_format="{:.4f}".format,
+        header=False
+    )
+
+    mouse_df.to_csv(
+        log_dir + mouselog_filename,
+        float_format="{:.4f}".format,
+        header=False
+    )
+
+
+# Get session dataframes
+def get_session_dataframe(type):
+    df = None
+    if type == 'keyboard':
+        keybd_df = pd.DataFrame(session_kb)
+        keybd_df.set_index('timestamp', inplace=True)
+    elif type == 'mouse':
+        mouse_df = pd.DataFrame(session_ms)
+        mouse_df.set_index('timestamp', inplace=True)
+    return df
+
+
+
+# -------------------------- Internal functions ------------------------------ #
 
 """
-Functions defining the specific formats in which inputs are logged
+Callback functions defining the specific formats in which inputs are logged
 """
 def log_move(x, y):
-    log_action( mouse_logger, f"{x:04},{y:04},None,None,{profile + character}")
+    pass
+    action = MouseAction(elapsed_time(), x, y, 'None', 'None', profile, character)
+    log_action(action)
 
 def log_click(x, y, button, pressed):
     click_type = 'pressed' if pressed else 'released'
-    log_action( mouse_logger, f"{x:04},{y:04},{str(button)[7:]},{click_type},{profile + character}")
-    log_action( keyboard_logger, f"Mouse.{str(button)[7:]},{click_type},{profile + character}")
+
+    mouse_action = MouseAction(elapsed_time(), x, y, str(button)[7:], click_type, profile, character)
+    log_action(mouse_action)
+
+    keybd_action = KeyboardAction(elapsed_time(), f"Mouse.{str(button)[7:]}", click_type, profile, character)
+    log_action(keybd_action)
 
 def log_scroll(x, y, dx, dy):
     scroll_dir = 'down' if dy < 0 else 'up'
-    log_action( mouse_logger, f"{x:04},{y:04},scroll,{str(scroll_dir)},{profile + character}")
+
+    action = MouseAction(elapsed_time(), x, y, 'scroll', str(scroll_dir), profile, character)
+    log_action(action)
 
 def log_key_press(key):
     if str(key) == pause_keycode:
         if paused: resume()
         else: pause()
+
     else:
         # Special case: comma key (since logfile is commma separated)
         str_key = str(key)
@@ -150,7 +257,8 @@ def log_key_press(key):
             str_key = 'Key.comma'
 
         if key not in pressed_keys:
-            log_action( keyboard_logger, f"{str_key},pressed,{profile + character}")
+            action = KeyboardAction(elapsed_time(), str_key, 'pressed', profile, character)
+            log_action(action)
             pressed_keys.add(key)
 
 def log_key_release(key):
@@ -159,74 +267,28 @@ def log_key_release(key):
         str_key = str(key)
         if str_key == "','":
             str_key = 'Key.comma'
-            
-        log_action( keyboard_logger, f"{str_key},released,{profile + character}")
+        
+        action = KeyboardAction(elapsed_time(), str_key, 'released', profile, character)
+        log_action(action)
         pressed_keys.discard(key)
+
 
 """    
 Intermediary logging function
 Make the script more readable and less error-prone
 """
-def log_action(logger, message):
+def log_action(action):
     if not paused:
-        logger.info(message, 
-            extra={'elapsed_time': time.perf_counter() - logging_start_time})
-
-# Declare listeners
-mouse_listener = None
-keyboard_listener = None
-
-# "Start" threads (more importantly start the counter)
-def start():
-    global mouse_listener, keyboard_listener, logging_start_time, running, paused
-    logging_start_time = time.perf_counter()
-
-    #Create new event listener threads
-    mouse_listener = mouse.Listener(
-        on_move=log_move,
-        on_click=log_click,
-        on_scroll=log_scroll)
-    keyboard_listener = keyboard.Listener(
-        on_press=log_key_press,
-        on_release=log_key_release)
-
-    create_loggers()
-
-    mouse_listener.start()
-    keyboard_listener.start()
-
-    running = True
-    paused = False
-
-# Stop listener threads
-def stop():
-    global running, paused, mouse_logger, keyboard_logger
-
-    mouse_listener.stop()
-    keyboard_listener.stop()
-    mouse_logger.handlers[0].close()
-    keyboard_logger.handlers[0].close()
-    mouse_logger = None
-    keyboard_logger = None
-
-    running = False
-    paused = False
-
-# Set pause flag true (stop logging)
-def pause():
-    global paused, pause_time
-    paused = True
-    pause_time = time.perf_counter()
-
-# Set pause flag to false and continue logging
-def resume():
-    global paused, logging_start_time
-    paused = False
-    logging_start_time += (time.perf_counter() - pause_time)
+        if type(action) is KeyboardAction:
+            session_kb['timestamp'].append(action.timestamp)
+            session_kb['key'].append(action.key)
+            session_kb['action'].append(action.action)
+            session_kb['profile'].append(action.profile + action.character)
+        elif type(action) is MouseAction:
+            session_ms['timestamp'].append(action.timestamp)
+            session_ms['x'].append(action.x)
+            session_ms['y'].append(action.y)
+            session_ms['button'].append(action.button)
+            session_ms['action'].append(action.action)
+            session_ms['profile'].append(action.profile + action.character)
     
-# Get the amount of time the logger has been active for
-def elapsed_time():
-    if not paused:
-        return time.perf_counter() - logging_start_time
-    else:
-        return pause_time - logging_start_time

@@ -8,36 +8,45 @@ from sklearn.neural_network import MLPRegressor
 class LANDIS_classifier: 
     # class name needs to be considered, this could be our generalized class for all classification methods
     def __init__(self, ct, target, seg_length):
+
         self.target = target
         self.classifier_type = ct
         self.mostRecentPredictions = []
-        routing_file = open('../.routing', 'r')
-        Lines = routing_file.readlines()
 
         # List of parsed logfiles
         keyboard = []
         mouse = []
 
-        for line in Lines:
-            line = line.strip()
-            if 'key.log' in line:
-                keyboard.append(parse_keyboard_log(line))
-            elif 'mouse.log' in line:
-                mouse.append(parse_mouse_log(line))
+        # Read logfile paths from .routing
+        log_paths = None
+        with open("../.routing", 'r', encoding='utf-8') as f:
+            log_paths = f.read().splitlines()   # Read lines without '\n's
 
-        X_train = []
-        Y_train = []
+        # Append each parsed log file to the appropriate list
+        for log_path in log_paths: 
+            if 'key.log' in log_path:
+                keyboard.append(parse_keyboard_log(log_path))
+            elif 'mouse.log' in log_path:
+                mouse.append(parse_mouse_log(log_path))
 
-        for k in range(len(keyboard) - 1):
-            for i in range(int(keyboard[k].time.iloc[-1] / seg_length)):
-                # For each segment in each logfile
-                # Create a heatmap for that segment
-                heatmap = KeyboardHeatmap(keyboard[k], i, seg_length)
-                heatmap = heatmap.to_binary_class_label(target)
+        X_train = []  # List of segment heatmaps used for training
+        y_train = []  # List of true or false labels based on current target
+
+        # k = index of parsed kb file (0-indexed)
+        for k, kb_parsed in enumerate(keyboard):
+            # Get number of seg_length length segments from parsed log
+            seg_count = int(kb_parsed.time.iloc[-1] / seg_length)
+            # For each segment in the parsed log
+            for i in range(seg_count):  # i = segment index
+                # Create a heatmap for the segment
+                heatmap = KeyboardHeatmap(kb_parsed, i, seg_length)
+                # Convert labels to 'true' or 'false' (0 or 1) based on target
+                heatmap = heatmap.to_binary_class_label(self.target)
                 # If the heatmap isn't blank
                 if heatmap.class_label() != 'Null':
+                    # Append segment to training data
                     X_train.append(heatmap.heatmap_data().ravel().tolist())
-                    Y_train.append(heatmap.class_label())
+                    y_train.append(heatmap.class_label())
         
         if ct == "RF":
             self.classifier = RandomForestClassifier(
@@ -55,7 +64,7 @@ class LANDIS_classifier:
                 solver='adam', 
                 max_iter=10000)
         
-        self.classifier.fit(X_train, Y_train) 
+        self.classifier.fit(X_train, y_train)
     
     def predict(self, filepath):
         # Currently only uses keyboard file, will eventually have to use mouse
