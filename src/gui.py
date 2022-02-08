@@ -47,6 +47,7 @@ characters = [
 ]
 
 methods = [
+    "None",
     "RF",
     "KNN",
     "ANN"
@@ -106,7 +107,7 @@ class LandisLogger(tk.Tk):
         self.curr_character = tk.StringVar()
         self.curr_character.set("character")
         self.curr_method = tk.StringVar()
-        self.curr_method.set("method")
+        self.curr_method.set("None")
 
         # Classifier
         self.classifier = None
@@ -152,7 +153,7 @@ class LandisLogger(tk.Tk):
         self.btn_save   = tk.Button(self.frm_status, text='Save',  width=7, state='disabled')
 
         self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
-        self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=6)
+        self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=20)
 
         self.lbl_profile = tk.Label(self.frm_status, text='Profile:')
         self.lbl_character = tk.Label(self.frm_status, text='Character:')
@@ -186,7 +187,7 @@ class LandisLogger(tk.Tk):
         self.configure_settings_widgets()
 
         # Set default log directory for keylogger
-        keylogger.set_log_directory('../' + self.get_default_log_directory())
+        keylogger.set_log_directory(self.get_default_log_directory())
 
 
     """
@@ -209,13 +210,14 @@ class LandisLogger(tk.Tk):
     def update_prediction(self, seglength):
         if keylogger.running:
             # Get the current session data as a DataFrame
-            session_data = keylogger.get_session_dataframe('keyboard')
+            session_df = keylogger.get_session_dataframe('keyboard')
             
             # Get predictions
-            prediction = self.classifier.predict(session_data, seglength)
+            prediction = self.classifier.predict(session_df, seglength)
             
             # Update prediction in gui
-            self.curr_prediction.set(f"{(prediction*100):2.2f}%")
+            self.curr_prediction.set(
+                f"{self.curr_method.get()}: {prediction[0]}, Tap: {(prediction[1]*100):2.2f}%")
 
             # Re-run this function every [seglength] seconds
             self.after(seglength * 1000, self.update_prediction, seglength)
@@ -225,7 +227,7 @@ class LandisLogger(tk.Tk):
     """
     # Save user preferences
     def save_preferences(self):
-        with open('../.preferences', 'w', encoding='utf-8') as f:
+        with open('.preferences', 'w', encoding='utf-8') as f:
                 f.write("pausekey: " + self.pausekey + '\n')
                 f.write("log_dir: " + self.log_dir + '\n')
                 f.write("profile: " + self.curr_profile.get() + '\n')
@@ -234,11 +236,11 @@ class LandisLogger(tk.Tk):
     # Load user preferences
     def load_preferences(self):
         # Check that .preferences file exists
-        file = pathlib.Path('../.preferences')
+        file = pathlib.Path('.preferences')
         if file.exists():
             # If any of the following operations fail, delete .preferences
             try:
-                with open('../.preferences', 'r', encoding='utf-8') as f:
+                with open('.preferences', 'r', encoding='utf-8') as f:
                     data = f.readlines()
                     # First line, extract from 10th character to the newline
                     self.pausekey = data[0][10:-1]
@@ -256,14 +258,14 @@ class LandisLogger(tk.Tk):
     def update_routing_table(self):
         if self.use_default_dir.get():
             # Read all lines from routing file and check for matches
-            with open('../.routing', 'r', encoding='utf-8') as f:
+            with open('.routing', 'r', encoding='utf-8') as f:
                         entries = f.readlines()
                         for entry in entries:
                             if self.get_default_log_directory() in entry:
                                 return # Found a match, exit method
             
             # Write logfile paths to routing file
-            with open('../.routing', 'a', encoding='utf-8') as f:
+            with open('.routing', 'a', encoding='utf-8') as f:
                     f.write('./' + self.get_default_log_directory() + mouselog_filename + '\n')
                     f.write('./' + self.get_default_log_directory() + keylog_filename + '\n')
 
@@ -283,7 +285,7 @@ class LandisLogger(tk.Tk):
     def toggle_status(self, event):
         # State machine of toggle button
         if self.btn_toggle['text'] == "Start":
-            self.update_lbl_status("Training...")
+            self.update_lbl_status("Training models...")
             self.update()
             self.init_classifier()
             keylogger.start()
@@ -312,8 +314,11 @@ class LandisLogger(tk.Tk):
         self.update_lbl_status("Stopped")
 
     def save_log(self, event):
+        self.update_lbl_status("Saving logs...")
+        self.update()
         keylogger.save_log()
         self.update_routing_table()
+        self.update_lbl_status("Stopped")
 
     def set_profile(self, var, ix, op):
         keylogger.set_profile(self.curr_profile.get())
@@ -321,7 +326,7 @@ class LandisLogger(tk.Tk):
         
         if self.use_default_dir.get():
             self.update_lbl_logdir()
-            keylogger.set_log_directory('../' + self.get_default_log_directory())
+            keylogger.set_log_directory(self.get_default_log_directory())
         
 
     def set_character(self, var, ix, op):
@@ -330,7 +335,7 @@ class LandisLogger(tk.Tk):
 
         if self.use_default_dir.get():
             self.update_lbl_logdir()
-            keylogger.set_log_directory('../' + self.get_default_log_directory())
+            keylogger.set_log_directory(self.get_default_log_directory())
         
 
     # Settings widget behavior
@@ -489,12 +494,12 @@ class LandisLogger(tk.Tk):
         self.btn_method.grid(row=4, column=1, padx=5, sticky='e')
 
         self.lbl_prediction.grid(row=5, column=1, padx=10)
-        self.lbl_predicted.grid(row=5, column=2, sticky='w')
+        self.lbl_predicted.grid(row=5, column=2, columnspan=3, sticky='w')
 
         # Assign settings widget behavior
         self.btn_toggle.bind('<ButtonRelease-1>', self.toggle_status)
-        self.btn_stop.bind('<Button-1>', self.stop_keylogger)
-        self.btn_save.bind('<Button-1>', self.save_log)
+        self.btn_stop.bind('<ButtonRelease-1>', self.stop_keylogger)
+        self.btn_save.bind('<ButtonRelease-1>', self.save_log)
         self.curr_profile.trace('w', self.set_profile)
         self.curr_character.trace('w', self.set_character)
 

@@ -209,9 +209,7 @@ def save_log():
 
     # Create dataframes
     keybd_df = pd.DataFrame(session_kb)
-    keybd_df.set_index('time', inplace=True)
     mouse_df = pd.DataFrame(session_ms)
-    mouse_df.set_index('time', inplace=True)
     
     # Save dataframes to file
     keybd_df.to_csv(

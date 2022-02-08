@@ -9,12 +9,16 @@ from sklearn.neural_network import MLPRegressor
 
 class LANDIS_classifier: 
     # class name needs to be considered, this could be our generalized class for all classification methods
-    def __init__(self, target, seg_length, ctype = 'RF'):
+    def __init__(self, target, seg_length, ctype = 'None'):
 
         self.target = target
         self.classifier_type = ctype
         self.mostRecentPredictions = []
-    
+        self.classifier = None
+
+        if self.classifier_type == 'None':
+            return
+
         # List of parsed logfiles
         keyboard = []
         mouse = []
@@ -49,16 +53,16 @@ class LANDIS_classifier:
                     X_train.append(heatmap.heatmap_data().ravel().tolist())
                     y_train.append(heatmap.class_label())
         
-        if self.classifier_type == 'RF': # Default value
+        if self.classifier_type == 'RF':
             self.classifier = RandomForestClassifier(
                 n_jobs=-1, 
                 criterion='gini',
                 max_features= 'sqrt',
                 n_estimators = 100, 
                 oob_score = True)
-        #elif ct == "KNN":
-        # implement KNN classifier here
-        else :
+        #elif self.classifier_type == "KNN":
+            # implement KNN classifier here
+        elif self.classifier_type == 'ANN':
             self.classifier = MLPClassifier(
                 hidden_layer_sizes=(100,100), 
                 activation='relu', 
@@ -70,23 +74,29 @@ class LANDIS_classifier:
 
     # Currently only uses keyboard file, will eventually have to use mouse
     def predict(self, session_data, seglength):
+        # Verification outputs
+        classifier_verificaiton = 0
+        tap_verification = 0
+
         # Return if no data for prediction
         if session_data.empty:
-            return 0
+            return (0, 0)
 
-        # Isolate inputs from last [seglength] seconds
-        last_timestamp = session_data.time.iloc[-1]
-        kb_session_seg = session_data[session_data.time > (last_timestamp - seglength)]
 
-        heatmap = KeyboardHeatmap(kb_session_seg, 0, last_timestamp)
-        heatmap = heatmap.to_binary_class_label(self.target)
+        if self.classifier:
+            # Isolate inputs from last [seglength] seconds
+            last_timestamp = session_data.time.iloc[-1]
+            kb_session_seg = session_data[session_data.time > (last_timestamp - seglength)]
 
-        classifier_verificaiton = int(self.classifier.predict(heatmap.heatmap_data())[0])
+            heatmap = KeyboardHeatmap(kb_session_seg, 0, last_timestamp)
+            heatmap = heatmap.to_binary_class_label(self.target)
+
+            classifier_verificaiton = int(self.classifier.predict(heatmap.heatmap_data())[0])
 
         profile = str(session_data['class'].iloc[0])[:3]
         tap_verification = tap_durations.verify_session(session_data, profile)
 
-        return (classifier_verificaiton + tap_verification) / 2
+        return (classifier_verificaiton, tap_verification)
         """
         if heatmap.class_label() != 'Null':
             if len(self.mostRecentPredictions) < 2: 
