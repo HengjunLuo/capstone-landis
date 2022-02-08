@@ -218,7 +218,7 @@ class LandisLogger(tk.Tk):
             
             # Update prediction in gui
             self.curr_prediction.set(
-                f"{self.curr_method.get()}: {prediction[0]}, Tap: {(prediction[1]*100):2.2f}%")
+                f"{self.curr_method.get()}: {prediction[0]}")
 
             # Re-run this function every [seglength] seconds
             #self.after(seglength * 1000, self.update_prediction, seglength)
