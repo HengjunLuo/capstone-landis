@@ -46,7 +46,7 @@ class LANDIS_classifier:
                 # Create a heatmap for the segment
                 heatmap = KeyboardHeatmap(kb_parsed, i, seg_length)
                 # Convert labels to 'true' or 'false' (0 or 1) based on target
-                # heatmap = heatmap.to_binary_class_label(self.target)
+                heatmap = heatmap.to_binary_class_label(self.target)
                 # If the heatmap isn't blank
                 if heatmap.class_label() != 'Null':
                     # Append segment to training data
@@ -89,8 +89,9 @@ class LANDIS_classifier:
             kb_session_seg = session_data[session_data.time > (last_timestamp - seglength)]
 
             heatmap = KeyboardHeatmap(kb_session_seg, 0, last_timestamp)
+            heatmap = heatmap.to_binary_class_label(self.target)
 
-            classifier_verificaiton = self.classifier.predict(heatmap.heatmap_data())[0]
+            classifier_verificaiton = int(self.classifier.predict(heatmap.heatmap_data())[0])
 
         profile = str(session_data['class'].iloc[0])[:3]
         tap_verification = tap_durations.verify_session(session_data, profile)

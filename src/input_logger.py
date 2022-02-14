@@ -269,7 +269,7 @@ def log_key_press(key):
         else: pause()
 
     else:
-        # Special case: comma key (since logfile is commma separated)
+        # Special case: comma key (since logfile is comma separated)
         str_key = str(key)
         if str_key == "','":
             str_key = 'Key.comma'
@@ -281,7 +281,7 @@ def log_key_press(key):
 
 def log_key_release(key):
     if str(key) != pause_keycode:
-        # Special case: comma key (since logfile is commma separated)
+        # Special case: comma key (since logfile is comma separated)
         str_key = str(key)
         if str_key == "','":
             str_key = 'Key.comma'
