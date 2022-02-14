@@ -64,7 +64,7 @@ while(1):
     # We dont need to test, so use all data available
     rfc.fit(X_actual, Y_actual)
 
-    with open('forests/' + target + '_RF_' + str(seg_length) + '.pkl', 'wb') as fid:
+    with open('forests/' + target + '_RF.pkl', 'wb') as fid:
         pickle.dump(rfc, fid)    
 
     if target == 'NON':
