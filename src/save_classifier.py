@@ -3,6 +3,9 @@ from log_parser import parse_keyboard_log
 from log_parser import parse_mouse_log
 from keyboard_heatmap import KeyboardHeatmap
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
 from imblearn.under_sampling import RandomUnderSampler
 
 # Set to false to test non-binary classification
@@ -60,12 +63,24 @@ while(1):
         X_actual, Y_actual = undersample.fit_resample(X_actual, Y_actual)
 
     rfc = RandomForestClassifier(n_jobs=-1, criterion='gini', max_features= 'sqrt', n_estimators = 100, oob_score = True) 
+    knn = KNeighborsClassifier(n_neighbors=5)
+    ann = MLPClassifier(hidden_layer_sizes=(100,100), activation='relu',solver='adam', max_iter=10000)
+    nb = GaussianNB()
 
     # We dont need to test, so use all data available
     rfc.fit(X_actual, Y_actual)
+    knn.fit(X_actual, Y_actual)
+    ann.fit(X_actual, Y_actual)
+    nb.fit(X_actual, Y_actual)
 
-    with open('forests/' + target + '_RF.pkl', 'wb') as fid:
-        pickle.dump(rfc, fid)    
+    with open('classifiers/' + target + '/RF.pkl', 'wb') as f:
+        pickle.dump(rfc, f)    
+    with open('classifiers/' + target + '/KNN.pkl', 'wb') as f:
+        pickle.dump(knn, f) 
+    with open('classifiers/' + target + '/ANN.pkl', 'wb') as f:
+        pickle.dump(ann, f) 
+    with open('classifiers/' + target + '/NB.pkl', 'wb') as f:
+        pickle.dump(nb, f) 
 
     if target == 'NON':
         test_binary = True

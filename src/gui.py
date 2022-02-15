@@ -50,7 +50,8 @@ methods = [
     "None",
     "RF",
     "KNN",
-    "ANN"
+    "ANN",
+    "NB"
 ]
 
 class CollapsableFrame(tk.Frame):
@@ -202,8 +203,7 @@ class LandisLogger(tk.Tk):
         # For now, we will call it when user selects start
         training_segment_length = 100
         self.classifier = classifier.LANDIS_classifier(
-            self.curr_profile.get() + self.curr_character.get(), 
-            training_segment_length,
+            self.curr_profile.get(), 
             self.curr_method.get() 
         )
 
