@@ -7,19 +7,16 @@ from keyboard_heatmap import KeyboardHeatmap
 
 class LANDIS_classifier: 
     # class name needs to be considered, this could be our generalized class for all classification methods
-    def __init__(self, target, ctype = 'None', binary = True):
+    def __init__(self, target, ctype = 'None'):
 
         self.target = target
         self.classifier_type = ctype
         self.mostRecentPredictions = []
         self.classifier = None
 
-        if self.classifier_type == 'None':
+        # Make me a try/catch in the future
+        if self.classifier_type == 'None' or self.target == 'None':
             return
-        
-        # need to add button to GUI that allows user to select binary/Nonbinary
-        if binary == False:
-            target = 'NON'
         
         with open('classifiers/' + target + '/' + ctype + '.pkl', 'rb') as f:
             self.classifier = pickle.load(f)  
@@ -43,7 +40,7 @@ class LANDIS_classifier:
             heatmap = KeyboardHeatmap(kb_session_seg, 0, last_timestamp)
             heatmap = heatmap.to_binary_class_label(self.target)
 
-            classifier_verificaiton = int(self.classifier.predict(heatmap.heatmap_data())[0])
+            classifier_verificaiton = self.classifier.predict(heatmap.heatmap_data())[0]
 
         profile = str(session_data['class'].iloc[0])[:3]
         tap_verification = tap_durations.verify_session(session_data, profile)

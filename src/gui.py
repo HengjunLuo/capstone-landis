@@ -54,6 +54,16 @@ methods = [
     "NB"
 ]
 
+targets = [
+    "JON",
+    "MAR",
+    "ZIR",
+    "JOS",
+    "HEN",
+    "MIT",
+    "NON"
+]
+
 class CollapsableFrame(tk.Frame):
 
     def __init__(self, parent, text="", *args, **kwargs):
@@ -109,6 +119,8 @@ class LandisLogger(tk.Tk):
         self.curr_character.set("character")
         self.curr_method = tk.StringVar()
         self.curr_method.set("None")
+        self.curr_target = tk.StringVar()
+        self.curr_target.set("None")
 
         # Classifier
         self.classifier = None
@@ -160,9 +172,11 @@ class LandisLogger(tk.Tk):
         self.lbl_profile = tk.Label(self.frm_status, text='Profile:')
         self.lbl_character = tk.Label(self.frm_status, text='Character:')
         self.lbl_method = tk.Label(self.frm_status, text='Method:')
+        self.lbl_target = tk.Label(self.frm_status, text='Target:')
         self.btn_profile = tk.OptionMenu(self.frm_status, self.curr_profile, *profiles)
         self.btn_character = tk.OptionMenu(self.frm_status, self.curr_character, *characters)
         self.btn_method = tk.OptionMenu(self.frm_status, self.curr_method, *methods)
+        self.btn_target = tk.OptionMenu(self.frm_status, self.curr_target, *targets)
 
         self.lbl_loglength = tk.Label(self.frm_status, text="Log length:")
         self.lbl_time = tk.Label(self.frm_status, textvariable=self.elapsed_time, width=6)
@@ -195,16 +209,15 @@ class LandisLogger(tk.Tk):
     """
     Classification methods
     """
-    def init_classifier(self):
+    def set_classifier(self, var, ix, op):
         # Call to initialize and train a classifier for the selected parameters
         # Important parameters are target class, profile, and the type of classifier
         # For now solution will only use decision tree
         # Training takes a few seconds, so we dont want to call it every time a gui option is changed
         # For now, we will call it when user selects start
-        training_segment_length = 100
         self.classifier = classifier.LANDIS_classifier(
-            self.curr_profile.get(), 
-            self.curr_method.get() 
+            self.curr_target.get(),
+            self.curr_method.get()
         )
 
     
@@ -288,7 +301,6 @@ class LandisLogger(tk.Tk):
         if self.btn_toggle['text'] == "Start":
             self.update_lbl_status("Training...")
             self.update()
-            self.init_classifier()
             keylogger.start()
             self.btn_toggle['text']  = 'Pause'
             self.btn_stop['state']   = 'normal'
@@ -342,7 +354,6 @@ class LandisLogger(tk.Tk):
         if self.use_default_dir.get():
             self.update_lbl_logdir()
             keylogger.set_log_directory(self.get_default_log_directory())
-        
 
     # Settings widget behavior
     def update_lbl_pausekey(self, key):
@@ -479,6 +490,7 @@ class LandisLogger(tk.Tk):
         self.btn_profile.config(width=8)
         self.btn_character.config(width=8)
         self.btn_method.config(width=8)
+        self.btn_target.config(width=8)
 
         # Status widgets positioning
         self.lbl_running.grid(row=0, column=0, columnspan=5, sticky='s')
@@ -498,7 +510,11 @@ class LandisLogger(tk.Tk):
 
         self.lbl_method.grid(row=4, column=0, sticky='e')
         self.btn_method.grid(row=4, column=1, padx=5, sticky='e')
-        self.btn_verify.grid(row=5, column=1, padx=1)
+
+        self.lbl_target.grid(row=5, column=0, sticky='e')
+        self.btn_target.grid(row=5, column=1, padx=5, sticky='e')
+
+        self.btn_verify.grid(row=6, column=1, padx=1)
 
         #self.lbl_prediction.grid(row=5, column=1, padx=10)
         self.lbl_predicted.grid(row=5, column=2, columnspan=3, sticky='w')
@@ -510,6 +526,8 @@ class LandisLogger(tk.Tk):
         self.btn_verify.bind('<ButtonRelease-1>', self.verify)
         self.curr_profile.trace('w', self.set_profile)
         self.curr_character.trace('w', self.set_character)
+        self.curr_method.trace('w', self.set_classifier)
+        self.curr_target.trace('w', self.set_classifier)
 
         # Fill text fields with initial values
         self.update_lbl_status("Not started")
