@@ -36,7 +36,7 @@ class KeyboardHeatmap:
     index: The index of the segment
     seg_length: The length of the segment (default 60)
     """
-    def __init__(self, dataframe, index, seg_length=60):
+    def __init__(self, dataframe, index = -1, seg_length=60):
         
         # Extract frequency and duration data from segment
         self.keyboard_df = extract_keyboard_features(dataframe, index, seg_length)

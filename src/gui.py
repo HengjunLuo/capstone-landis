@@ -485,13 +485,10 @@ class LandisLogger(tk.Tk):
             self.canvas.draw_idle()
     
     def plot(self):
-        n1 = 1 + int(keylogger.elapsed_time()) % 5
-        n2 = 2 + int(keylogger.elapsed_time()) % 7
-        n3 = 0.2
-        self.initBoard = np.zeros((n1, n2))
-        for row in range(0,n1):
-            for column in range(0,n2):
-                self.initBoard[row][column] = np.random.choice(np.arange(0, 2), p = [1 - n3, n3])
+        session_df = keylogger.get_session_dataframe('keyboard')
+        hm = keyboard_heatmap.KeyboardHeatmap(session_df)
+        self.initBoard = hm.heatmap_data()
+        self.initBoard = np.reshape(self.initBoard, (8,10))
 
     """
     Window configuration methods

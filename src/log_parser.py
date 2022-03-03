@@ -1,3 +1,4 @@
+from cmath import inf
 import pandas as pd
 
 """
@@ -28,8 +29,12 @@ returns: Pandas DataFrame
 
 *Note* Segment length determines index, i.e. "The 5th 15-second segment"
 """
-def get_segment(parsedFile, index, seg_length=60):
+def get_segment(parsedFile, index = -1, seg_length=60):
     # Calculate first and last second of segment
+
+    if index == -1: # default means we return all of the data unsegmented
+        return parsedFile
+    
     last_sec = (index + 1) * seg_length
     first_sec = last_sec - seg_length
 
@@ -63,7 +68,7 @@ keyBindings = ["w","a","s","d",
                 "Mouse.left","Mouse.right"]
 
 
-def extract_keyboard_features(parsedFile, index, seg_length=60):
+def extract_keyboard_features(parsedFile, index = -1, seg_length=60):
 
     # Parse the file and get specified segment
     parsedFile = get_segment(parsedFile, index, seg_length)
@@ -192,7 +197,7 @@ def extract_mouse_clicks(parsedFile, index, seg_length=60):
     return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
 
 predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q'], '1':['w']}
-def extract_predefined_patterns(parsedFile, index, seg_length=60):
+def extract_predefined_patterns(parsedFile, index = -1, seg_length=60):
 
     # Parse the file and get specified segment
     parsedFile = get_segment(parsedFile, index, seg_length)
