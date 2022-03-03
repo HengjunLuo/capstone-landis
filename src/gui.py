@@ -15,9 +15,17 @@ import input_logger as keylogger
 import tkinter as tk
 from tkinter import ttk 
 import pathlib
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 
 import log_parser
 import classifier
+import keyboard_heatmap
+
+# TkAgg backend is made ti integrate matplotlib to TKinter
+matplotlib.use('TkAgg')
 
 # Names of output files
 keylog_filename = "key.log"
@@ -87,7 +95,6 @@ class CollapsableFrame(tk.Frame):
         self.lbl_title.bind('<Enter>', self.highlight)
         self.lbl_title.bind('<Leave>', self.unhighlight)
         self.lbl_title.bind('<Button-1>', self.toggle)
-        
 
     def toggle(self, event):
         self.show = not self.show
@@ -141,8 +148,8 @@ class LandisLogger(tk.Tk):
         keylogger.set_character(self.curr_character.get())
 
         # Window dimensions
-        _windowwidth = 350
-        _windowheight = 75
+        _windowwidth = 800
+        _windowheight = 450
 
         # Main window settings
         self.configure_window(_windowwidth, _windowheight)
@@ -182,7 +189,21 @@ class LandisLogger(tk.Tk):
         self.lbl_time = tk.Label(self.frm_status, textvariable=self.elapsed_time, width=6)
 
         self.configure_status_widgets()
-        
+
+        # ------------------
+        # ------------------
+        # ------------------
+        # ------------------
+        # PLACEHOLDER FIGURE FOR KEYBOARD HEATMAP
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
+        self.ax.axis('off')
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
+        self.canvas.get_tk_widget().grid(row=6, column=0)
+        # ------------------
+        # ------------------
+        # ------------------
+        # ------------------
 
         # ----- Settings widgets -----
         # Title and info bar
@@ -231,7 +252,7 @@ class LandisLogger(tk.Tk):
             
             # Update prediction in gui
             self.curr_prediction.set(
-                f"{self.curr_method.get()}: {prediction[0]}")
+                f"{self.curr_method.get()}: {prediction}")
 
             # Re-run this function every [seglength] seconds
             #self.after(seglength * 1000, self.update_prediction, seglength)
@@ -459,6 +480,18 @@ class LandisLogger(tk.Tk):
 
         if keylogger.running:
             self.after(100, self.check_status) # Run this function every 0.1s
+            self.plot()
+            self.ax.imshow(self.initBoard)
+            self.canvas.draw_idle()
+    
+    def plot(self):
+        n1 = 1 + int(keylogger.elapsed_time()) % 5
+        n2 = 2 + int(keylogger.elapsed_time()) % 7
+        n3 = 0.2
+        self.initBoard = np.zeros((n1, n2))
+        for row in range(0,n1):
+            for column in range(0,n2):
+                self.initBoard[row][column] = np.random.choice(np.arange(0, 2), p = [1 - n3, n3])
 
     """
     Window configuration methods

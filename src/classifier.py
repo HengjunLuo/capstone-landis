@@ -25,12 +25,10 @@ class LANDIS_classifier:
     def predict(self, session_data, seglength):
         # Verification outputs
         classifier_verificaiton = 0
-        tap_verification = 0
 
         # Return if no data for prediction
         if session_data.empty:
             return (0, 0)
-
 
         if self.classifier:
             # Isolate inputs from last [seglength] seconds
@@ -42,51 +40,4 @@ class LANDIS_classifier:
 
             classifier_verificaiton = self.classifier.predict(heatmap.heatmap_data())[0]
 
-        profile = str(session_data['class'].iloc[0])[:3]
-        tap_verification = tap_durations.verify_session(session_data, profile)
-
-        return (classifier_verificaiton, tap_verification)
-        """
-        if heatmap.class_label() != 'Null':
-            if len(self.mostRecentPredictions) < 2: 
-                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                #return self.mostRecentPredictions[-1]# return the most recent prediction
-                return self.mostRecentPredictions
-            elif len(self.mostRecentPredictions) == 2:
-                # now we have 3 predictions, now vote!
-                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                '''if sum(self.mostRecentPredictions) > 1:
-                    return 1
-                else:
-                    return 0'''
-                return self.mostRecentPredictions
-            elif len(self.mostRecentPredictions) == 3:
-                
-                # now we have 4 predictions, but we only use the most recent 3 predictions to vote
-                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                '''if sum(self.mostRecentPredictions[-3]) > 1:
-                    return 1
-                else:
-                    return 0'''
-                return self.mostRecentPredictions
-            elif len(self.mostRecentPredictions) == 4:
-                # now we have 5 predictions, vote!
-                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                '''if sum(self.mostRecentPredictions) > 2:
-                    return 1
-                else:
-                    return 0'''
-                return self.mostRecentPredictions
-            elif len(self.mostRecentPredictions) == 5:
-                # pop the oldest prediction and then add a new one to keep the prediction list size as 5
-                self.mostRecentPredictions.pop(0)
-                self.mostRecentPredictions.append(int(self.classifier.predict(heatmap.heatmap_data())[0]))
-                '''if sum(self.mostRecentPredictions) > 2:
-                    return 1
-                else:
-                    return 0'''
-                return self.mostRecentPredictions
-        else:
-            return "---"
-        """
-
+        return (classifier_verificaiton)
