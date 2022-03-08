@@ -121,9 +121,9 @@ class LandisLogger(tk.Tk):
         self.pausekey = "`"
         self.log_dir = './'
         self.curr_profile = tk.StringVar()
-        self.curr_profile.set("profile")
+        self.curr_profile.set("Profile")
         self.curr_character = tk.StringVar()
-        self.curr_character.set("character")
+        self.curr_character.set("Character")
         self.curr_method = tk.StringVar()
         self.curr_method.set("None")
         self.curr_target = tk.StringVar()
@@ -168,11 +168,11 @@ class LandisLogger(tk.Tk):
 
         # Create widgets
         self.lbl_running = tk.Label(self.frm_status, width=25, font=('Helvetica', 20, 'bold'))
-        self.btn_toggle = tk.Button(self.frm_status, text='Start', width=7)
+        self.btn_toggle = tk.Button(self.frm_status, text='Start', width=7,bg='lightskyblue')
         self.btn_stop   = tk.Button(self.frm_status, text='Stop',  width=7, state='disabled')
         self.btn_save   = tk.Button(self.frm_status, text='Save',  width=7, state='disabled')
         self.btn_verify = tk.Button(self.frm_status, text='Verify', width=11, state='disabled')
-        self.lbl_status = tk.Label(self.frm_status, text="Status:",font=('Helvetica',9,'bold'))
+        self.lbl_result = tk.Label(self.frm_status, text="Result:",width=7)
 
         self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
         self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=20)
@@ -529,10 +529,10 @@ class LandisLogger(tk.Tk):
         self.lbl_loglength.grid(row=1, column=1, padx=10)
         self.lbl_time.grid(row=1, column=2, sticky='w')
 
-        self.lbl_status.grid(row=2,column=3,padx=1)
-        self.btn_toggle.grid(row=3, column=3, padx=1)
-        self.btn_stop.grid(row=4, column=3, padx=1)
-        self.btn_save.grid(row=5, column=3, padx=1)
+        self.lbl_result.grid(row=5,column=3,padx=1)
+        self.btn_toggle.grid(row=2, column=3, padx=1)
+        self.btn_stop.grid(row=3, column=3, padx=1)
+        self.btn_save.grid(row=4, column=3, padx=1)
 
         self.lbl_profile.grid(row=2, column=0, sticky='e')
         self.btn_profile.grid(row=2, column=1, padx=5, sticky='e')
