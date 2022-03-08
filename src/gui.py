@@ -480,9 +480,9 @@ class LandisLogger(tk.Tk):
 
         if keylogger.running:
             self.after(100, self.check_status) # Run this function every 0.1s
-            self.plot()
-            self.ax.imshow(self.initBoard)
-            self.canvas.draw_idle()
+            #self.plot()
+            #self.ax.imshow(self.initBoard)
+            #self.canvas.draw_idle()
     
     def plot(self):
         session_df = keylogger.get_session_dataframe('keyboard')
