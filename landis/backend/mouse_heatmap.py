@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from log_parser import get_segment
+from backend.log_parser import get_segment
 
 """
 MouseHeatmap class takes a segment from a parsed file generated from a 

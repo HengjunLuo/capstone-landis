@@ -1,9 +1,10 @@
-from log_parser import parse_keyboard_log
-from log_parser import parse_mouse_log
-import tap_durations
 import pickle
 
-from keyboard_heatmap import KeyboardHeatmap
+from backend.log_parser import parse_keyboard_log
+from backend.log_parser import parse_mouse_log
+from backend.keyboard_heatmap import KeyboardHeatmap
+import backend.tap_durations
+
 
 class LANDIS_classifier: 
     # class name needs to be considered, this could be our generalized class for all classification methods

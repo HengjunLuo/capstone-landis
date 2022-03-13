@@ -1,11 +1,10 @@
 import numpy as np
-import scipy.stats as stats
 from statistics import NormalDist
 
 from numpy_ringbuffer import RingBuffer
 import pathlib
 
-from log_parser import parse_keyboard_log
+from backend.log_parser import parse_keyboard_log
 
 # Size of sliding window for each key 
 # (mean and stddev of the last {sample_size} key taps)
