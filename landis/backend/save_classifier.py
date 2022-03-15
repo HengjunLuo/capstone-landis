@@ -1,12 +1,13 @@
 import pickle
-from log_parser import parse_keyboard_log
-from log_parser import parse_mouse_log
-from keyboard_heatmap import KeyboardHeatmap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from imblearn.under_sampling import RandomUnderSampler
+
+from backend.log_parser import parse_keyboard_log
+from backend.log_parser import parse_mouse_log
+from backend.keyboard_heatmap import KeyboardHeatmap
 
 # Set to false to test non-binary classification
 test_binary = False

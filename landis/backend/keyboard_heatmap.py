@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from log_parser import extract_keyboard_features
-from log_parser import extract_mouse_clicks
-from log_parser import extract_predefined_patterns
+from backend.log_parser import extract_keyboard_features
+from backend.log_parser import extract_mouse_clicks
+from backend.log_parser import extract_predefined_patterns
 
 
 """
@@ -84,12 +84,25 @@ class KeyboardHeatmap:
         plt.imshow(a3, cmap='cividis')
         plt.tick_params(which='both', bottom=False, labelbottom=False, left=False, labelleft=False)
         plt.show()
+    
+    def heatmap_data(self):
+        a1 = self.arrFreq.reshape((1, len(self.keyBindings)))
+        a2 = self.arrDura.reshape((1, len(self.keyBindings)))
+        a3 = self.flightAvgDura.reshape((1,len(self.flightTimePatterns)))
+        a4 = self.flightShortestDura.reshape((1,len(self.flightTimePatterns)))
+        a5 = self.flightLongestDura.reshape((1,len(self.flightTimePatterns)))
+
+        result = np.append(a1, a2, axis=1)
+        result = np.append(result, a3, axis=1)
+        result = np.append(result, a4, axis=1)
+        result = np.append(result, a5, axis=1)
+        return result
 
     """
     Return the heatmap as a numpy array for feature input
     """
     @staticmethod
-    def heatmap_data(df, index = -1, seg_length=60):
+    def heatmap_data_gui(df, index = -1, seg_length=60):
         # Extract frequency and duration data from segment
         keyboard_df = extract_keyboard_features(df, index, seg_length)
 
