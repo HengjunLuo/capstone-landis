@@ -196,7 +196,12 @@ def extract_mouse_clicks(parsedFile, index, seg_length=60):
     # Return a Pandas DataFrame built from results
     return pd.DataFrame(resultList, columns = ['key', 'avg_duration', 'freq', 'class'])
 
-predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q'], '1':['w']}
+predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q','Key.tab'], '1':['w'],'Key.tab':['a']}
+# w to s,q,1 belong to the middle finger, d to f belongs to the index inger, a to q belongs to the ring finger.
+middleFingerPatterns = ['qw','wq','sw','ws','1w','w1']
+indexFingerPatterns = ['df','fd']
+ringFingerPatterns = ['aq','qa','aKey.tab','Key.taba']
+
 def extract_predefined_patterns(parsedFile, index = -1, seg_length=60):
 
     # Parse the file and get specified segment
@@ -229,6 +234,15 @@ def extract_predefined_patterns(parsedFile, index = -1, seg_length=60):
                         if tempReleaseDict[pairedKey] < time and time - tempReleaseDict[pairedKey] <= 0.3:
                             curr_duration = time - tempReleaseDict[pairedKey]# calculate duration for this release-press pair
                             resultKey = key + pairedKey # compute resultKey
+                            
+                            # Bias remover. Categorize flight time patterns into fingers
+                            if resultKey in middleFingerPatterns:
+                                resultKey = 'middle_finger'
+                            elif resultKey in indexFingerPatterns:
+                                resultKey = 'index_finger'
+                            elif resultKey in ringFingerPatterns:
+                                resultKey = 'ring_finger'
+
                             if resultKey in resultDict:# if it's not the first record for resultKey
                                 # update total duration and freq
                                 resultDict[resultKey][0] += curr_duration

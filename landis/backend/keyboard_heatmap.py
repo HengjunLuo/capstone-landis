@@ -23,13 +23,13 @@ class KeyboardHeatmap:
                 "1","2","3","4","5","6","7","8","9","0",
                 "Key.tab",
                 "Mouse.left","Mouse.right"]
-    predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q'], '1':['w']}
-    flightTimePatterns = []
-    for item in predefined_patterns:
-        for subItem in predefined_patterns[item]:
-            combineKey = item + subItem
-            flightTimePatterns.append(combineKey)
-    
+    predefined_patterns = {'w':['s','q','1'], 's':['w'], 'd':['f'], 'f':['d'], 'q':['a','w'], 'a':['q','Key.tab'], '1':['w'],'Key.tab':['a']}
+    flightTimePatterns = ["middle_finger", "index_finger","ring_finger"]
+    # item in predefined_patterns:
+    #    for subItem in predefined_patterns[item]:
+    #        combineKey = item + subItem
+    #        flightTimePatterns.append(combineKey)
+
     """
     Construct the heatmap object by passing it a pandas dataframe
     The dataframe must be generated from a keyboard_actions log file
@@ -70,7 +70,7 @@ class KeyboardHeatmap:
                 self.flightAvgDura[KeyboardHeatmap.flightTimePatterns.index(key)] = self.flightTime_df.avg_duration[key]
                 self.flightShortestDura[KeyboardHeatmap.flightTimePatterns.index(key)] = self.flightTime_df.shortestDuration[key]
                 self.flightLongestDura[KeyboardHeatmap.flightTimePatterns.index(key)] = self.flightTime_df.longestDuration[key]
-
+                
     """
     Display the heatmap of specified segment
     """
