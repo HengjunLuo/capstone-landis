@@ -22,7 +22,7 @@ import numpy as np
 
 import log_parser
 import classifier
-import keyboard_heatmap
+from keyboard_heatmap import KeyboardHeatmap
 
 # TkAgg backend is made ti integrate matplotlib to TKinter
 matplotlib.use('TkAgg')
@@ -461,7 +461,7 @@ class LandisLogger(tk.Tk):
 
 
     """
-    Method is called every 0.1s (10x per sec)
+    Method is called every 0.1s
     """
     def check_status(self):
         if keylogger.running == False:
@@ -480,16 +480,12 @@ class LandisLogger(tk.Tk):
         self.elapsed_time.set(f"{minutes:02.0f}m {seconds:02.0f}s")
 
         if keylogger.running:
+            self.plot()
             self.after(100, self.check_status) # Run this function every 0.1s
-            #self.plot()
-            #self.ax.imshow(self.initBoard)
-            #self.canvas.draw_idle()
     
     def plot(self):
-        session_df = keylogger.get_session_dataframe('keyboard')
-        hm = keyboard_heatmap.KeyboardHeatmap(session_df)
-        self.initBoard = hm.heatmap_data()
-        self.initBoard = np.reshape(self.initBoard, (8,10))
+        self.ax.imshow(KeyboardHeatmap.heatmap_data(keylogger.get_session_dataframe('keyboard')))
+        self.canvas.draw_idle()
 
     """
     Window configuration methods

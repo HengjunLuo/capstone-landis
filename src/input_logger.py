@@ -229,12 +229,10 @@ def save_log():
 
 # Get session dataframes
 def get_session_dataframe(type = 'keyboard'):
-    df = None
     if type == 'keyboard':
-        df = pd.DataFrame(session_kb)
+        return pd.DataFrame(session_kb)
     elif type == 'mouse':
-        df = pd.DataFrame(session_ms)
-    return df
+        return pd.DataFrame(session_ms)
 
 
 

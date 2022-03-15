@@ -6,13 +6,13 @@ from log_parser import extract_keyboard_features
 from log_parser import extract_mouse_clicks
 from log_parser import extract_predefined_patterns
 
+
 """
 KeyboardHeatmap class takes a segment from a parsed file generated from a 
 keyboard_actions log file and provides methods to display it as a heatmap 
 showing each keys frequency and duration during the specified segment
 """
 class KeyboardHeatmap:
-
     # Class attribute
     # The 23 default key bindings for team fortress 2 + mouse buttons = 25 in total
     keyBindings = ["w","a","s","d",
@@ -29,7 +29,7 @@ class KeyboardHeatmap:
         for subItem in predefined_patterns[item]:
             combineKey = item + subItem
             flightTimePatterns.append(combineKey)
-
+    
     """
     Construct the heatmap object by passing it a pandas dataframe
     The dataframe must be generated from a keyboard_actions log file
@@ -88,18 +88,24 @@ class KeyboardHeatmap:
     """
     Return the heatmap as a numpy array for feature input
     """
-    def heatmap_data(self):
-        a1 = self.arrFreq.reshape((1, len(self.keyBindings)))
-        a2 = self.arrDura.reshape((1, len(self.keyBindings)))
-        a3 = self.flightAvgDura.reshape((1,len(self.flightTimePatterns)))
-        a4 = self.flightShortestDura.reshape((1,len(self.flightTimePatterns)))
-        a5 = self.flightLongestDura.reshape((1,len(self.flightTimePatterns)))
+    @staticmethod
+    def heatmap_data(df, index = -1, seg_length=60):
+        # Extract frequency and duration data from segment
+        keyboard_df = extract_keyboard_features(df, index, seg_length)
 
-        result = np.append(a1, a2, axis=1)
-        result = np.append(result, a3, axis=1)
-        result = np.append(result, a4, axis=1)
-        result = np.append(result, a5, axis=1)
-        return result
+        # Set key column to index (unique values)
+        keyboard_df.set_index('key', inplace=True)
+
+        # Create np arrays initialized with 0s the same shape as the keybindings list
+        arrFreq = np.zeros_like(KeyboardHeatmap.keyBindings, dtype=float)
+        arrDura = np.zeros_like(KeyboardHeatmap.keyBindings, dtype=float)
+
+        for key in KeyboardHeatmap.keyBindings:
+            if key in keyboard_df.index:
+                arrFreq[KeyboardHeatmap.keyBindings.index(key)] = keyboard_df.freq[key]
+                arrDura[KeyboardHeatmap.keyBindings.index(key)] = keyboard_df.avg_duration[key]
+
+        return np.reshape(np.append(arrFreq, arrDura, axis=-1), [2,25])
 
     """
     Return the heatmap data as column names in ravel()ed heatmap order
