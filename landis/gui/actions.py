@@ -269,7 +269,7 @@ def check_status():
 
 
 def plot():
-    gui_app.ax.imshow(keyboard_heatmap.KeyboardHeatmap.heatmap_data(keylogger.get_session_dataframe('keyboard')))
+    gui_app.ax.imshow(keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(keylogger.get_session_dataframe('keyboard')))
     gui_app.canvas.draw_idle()
 
     
