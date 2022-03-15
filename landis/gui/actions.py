@@ -264,18 +264,15 @@ def check_status():
     gui_app.elapsed_time.set(f"{minutes:02.0f}m {seconds:02.0f}s")
 
     if keylogger.running:
+        plot()
         gui_app.after(100, check_status) # Run this function every 0.1s
-        # gui_app.plot()
-        # gui_app.ax.imshow(gui_app.initBoard)
-        # gui_app.canvas.draw_idle()
+
 
 def plot():
-    session_df = keylogger.get_session_dataframe('keyboard')
-    hm = keyboard_heatmap.KeyboardHeatmap(session_df)
-    gui_app.initBoard = hm.heatmap_data()
-    gui_app.initBoard = np.reshape(gui_app.initBoard, (8,10))
-    
+    gui_app.ax.imshow(keyboard_heatmap.KeyboardHeatmap.heatmap_data(keylogger.get_session_dataframe('keyboard')))
+    gui_app.canvas.draw_idle()
 
+    
 
 def bind():
     # Assign settings widget behavior
