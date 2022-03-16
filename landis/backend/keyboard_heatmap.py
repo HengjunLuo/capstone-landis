@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from backend.log_parser import extract_keyboard_features
-from backend.log_parser import extract_mouse_clicks
-from backend.log_parser import extract_predefined_patterns
+from log_parser import extract_keyboard_features
+from log_parser import extract_mouse_clicks
+from log_parser import extract_predefined_patterns
 
 
 """
