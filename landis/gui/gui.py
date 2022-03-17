@@ -84,7 +84,8 @@ class LandisLogger(tk.Tk):
         self.lbl_result = tk.Label(self.frm_status, text="Result:",width=7)
 
         self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
-        self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=20)
+        #self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=20)
+        self.lbl_predicted = tk.Label(self.frm_status, text = "---", width=20)
 
         self.lbl_profile = tk.Label(self.frm_status, text='Profile:')
         self.lbl_character = tk.Label(self.frm_status, text='Character:')

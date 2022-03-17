@@ -1,6 +1,7 @@
 
 import pathlib
 import numpy as np
+import time
 
 from backend import classifier
 from backend import keylogger
@@ -36,11 +37,28 @@ def update_prediction(seglength):
         prediction = gui_app.classifier.predict(session_df, seglength)
         
         # Update prediction in gui
-        gui_app.curr_prediction.set(
-            f"{gui_app.curr_method.get()}: {prediction}")
+        if  prediction == 1:
+            gui_app.lbl_predicted.config(bg="green")
+            gui_app.lbl_predicted['text'] = "Non-Fraudulent"
+        else:  
+            gui_app.lbl_predicted.config(bg="red")
+            gui_app.lbl_predicted['text'] = "Fraudulent"
+        
+        # Old code left here in case we don't like change
+        #gui_app.curr_prediction.set(
+            #f"{gui_app.curr_method.get()}: {prediction}")
 
         # Re-run this function every [seglength] seconds
         #gui_app.after(seglength * 1000, gui_app.update_prediction, seglength)
+
+
+# Emulates a loading screen with three dots (...)
+def loading(dots):
+    gui_app.lbl_predicted.config(bg="white")
+    for x in dots:
+        gui_app.lbl_predicted['text'] = x
+        gui_app.update_idletasks()
+        time.sleep(0.5)
 
 """
 File persistence methods
@@ -135,6 +153,7 @@ def stop_keylogger(event):
 
 def verify(event):
     seglength = min(60, keylogger.elapsed_time())
+    loading([".", ". .", ". . ."])
     update_prediction(seglength)
 
 def save_log(event):
@@ -265,7 +284,7 @@ def check_status():
 
     if keylogger.running:
         plot()
-        gui_app.after(100, check_status) # Run this function every 0.1s
+        gui_app.after(325, check_status) # Changed to 0.325 seconds (from 0.1) as this is the minimum time for no lag - Marco
 
 
 def plot():
