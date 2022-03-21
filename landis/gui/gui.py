@@ -104,11 +104,16 @@ class LandisLogger(tk.Tk):
         # ------------------
         # ------------------
         # PLACEHOLDER FIGURE FOR KEYBOARD HEATMAP
-        self.fig = plt.figure()
+        self.fig = plt.figure(figsize=(9,3))
         self.ax = self.fig.add_subplot(111)
-        self.ax.axis('off')
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
-        self.canvas.get_tk_widget().grid(row=6, column=0)
+        self.canvas.get_tk_widget().grid(row=2, column=0)
+        self.ax.set_xticks((np.arange(len(keyboard_heatmap.KeyboardHeatmap.keyBindings))))
+        self.ax.set_xticklabels(keyboard_heatmap.KeyboardHeatmap.keyBindings)
+        self.ax.set_yticks(np.arange(len(['Frequency','Duration'])))
+        self.ax.set_yticklabels(['Frequency','Duration'])
+        plt.setp(self.ax.get_xticklabels(), rotation=-90)
+        self.ax.imshow(np.zeros((2,25)))
         # ------------------
         # ------------------
         # ------------------
