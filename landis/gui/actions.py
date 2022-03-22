@@ -132,7 +132,8 @@ def toggle_status(event):
         gui_app.btn_save['state']   = 'disabled'
         gui_app.btn_verify['state'] = 'normal'
         gui_app.started = True
-        check_status()        # Start periodic status update checks
+        check_status()   # Start periodic status update checks
+        plot()          # Start periodic plot updates
         # gui_app.update_prediction(60) # Start periodic predictions every 60s
 
     elif gui_app.btn_toggle['text'] == "Pause":
@@ -284,13 +285,14 @@ def check_status():
     gui_app.elapsed_time.set(f"{minutes:02.0f}m {seconds:02.0f}s")
 
     if keylogger.running:
-        plot()
-        gui_app.after(325, check_status) # Changed to 0.325 seconds (from 0.1) as this is the minimum time for no lag - Marco
+        gui_app.after(100, check_status)
 
 
 def plot():
     gui_app.ax.imshow(keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(keylogger.get_session_dataframe('keyboard')))
     gui_app.canvas.draw_idle()
+    if keylogger.running:
+        gui_app.after(500, plot)
 
     
 
