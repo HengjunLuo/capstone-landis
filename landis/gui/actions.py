@@ -34,18 +34,24 @@ def update_prediction(seglength):
         # Get the current session data as a DataFrame
         session_df = keylogger.get_session_dataframe('keyboard')
         
-        # Get predictions
+        # Get prediction matrix 
         prediction = gui_app.classifier.predict(session_df, seglength)
-        
+        # Print prediction matrix, 2 indices for binary and 6 for non binary
+        gui_app.lbl_predicted['text'] = prediction
+
+
+        # Code for fraudulent/non-fraudulent commented out below
+       
         # Update prediction in gui
-        if  prediction == 1:
-            gui_app.lbl_predicted.config(bg="green")
-            gui_app.lbl_predicted['text'] = "Non-Fraudulent"
-        else:  
-            gui_app.lbl_predicted.config(bg="red")
-            gui_app.lbl_predicted['text'] = "Fraudulent"
+        #if  prediction == 1:
+            #gui_app.lbl_predicted.config(bg="green")
+            #gui_app.lbl_predicted['text'] = "Non-Fraudulent"
+        #else:  
+            #gui_app.lbl_predicted.config(bg="red")
+            #gui_app.lbl_predicted['text'] = "Fraudulent"
         
         # Old code left here in case we don't like change
+        
         #gui_app.curr_prediction.set(
             #f"{gui_app.curr_method.get()}: {prediction}")
 

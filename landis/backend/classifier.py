@@ -38,7 +38,7 @@ class LANDIS_classifier:
 
             heatmap = KeyboardHeatmap(kb_session_seg, 0, last_timestamp)
             heatmap = heatmap.to_binary_class_label(self.target)
-
-            classifier_verificaiton = self.classifier.predict(heatmap.heatmap_data())[0]
+            #Changed to predict_proba for testing purposes
+            classifier_verificaiton = self.classifier.predict_proba(heatmap.heatmap_data())[0]
 
         return (classifier_verificaiton)
