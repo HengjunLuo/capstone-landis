@@ -107,16 +107,25 @@ class LandisLogger(tk.Tk):
         # ------------------
         # ------------------
         # PLACEHOLDER FIGURE FOR KEYBOARD HEATMAP
-        self.fig = plt.figure(figsize=(9,3))
-        self.ax = self.fig.add_subplot(111)
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
-        self.canvas.get_tk_widget().grid(row=2, column=0)
-        self.ax.set_xticks((np.arange(len(keyboard_heatmap.KeyboardHeatmap.keyBindings))))
-        self.ax.set_xticklabels(keyboard_heatmap.KeyboardHeatmap.keyBindings)
-        self.ax.set_yticks(np.arange(len(['Frequency','Duration'])))
-        self.ax.set_yticklabels(['Frequency','Duration'])
-        plt.setp(self.ax.get_xticklabels(), rotation=-90)
-        self.ax.imshow(np.zeros((2,25)))
+        self.image_canvas = tk.Canvas(self, bg='#eee', width=750)
+        self.image_canvas.grid(row=2, column=0)
+        self.kb_image = tk.PhotoImage(file="images/qwerty-kb.gif")
+        self.ms_image = tk.PhotoImage(file="images/mouse.gif")
+        self.image_canvas.create_image(0, 10, anchor=tk.NW, image=self.kb_image)
+        self.image_canvas.create_image(580, 25, anchor=tk.NW, image=self.ms_image)
+
+        # self.fig = plt.figure(figsize=(9,3))
+        # self.ax = self.fig.add_subplot(111)
+        # self.pyplot_canvas = FigureCanvasTkAgg(self.fig, master=self)
+        # self.pyplot_canvas.get_tk_widget().grid(row=2, column=0)
+        # self.ax.set_xticks((np.arange(len(keyboard_heatmap.KeyboardHeatmap.keyBindings))))
+        # self.ax.set_xticklabels(keyboard_heatmap.KeyboardHeatmap.keyBindings)
+        # self.ax.set_yticks(np.arange(len(['Frequency','Duration'])))
+        # self.ax.set_yticklabels(['Frequency','Duration'])
+        # plt.setp(self.ax.get_xticklabels(), rotation=-90)
+        # self.ax.imshow(np.zeros((2,25)))
+
+
         # ------------------
         # ------------------
         # ------------------

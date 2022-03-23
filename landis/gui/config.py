@@ -26,7 +26,6 @@ def configure_frames(gui_app, windowwidth, windowheight):
     gui_app.frm_settings.grid(row=0, sticky="nsew")
 
 def configure_status_widgets(gui_app):
-    gui_app.title("test")
     # Adjust widgets
     gui_app.btn_profile.config(width=8)
     gui_app.btn_character.config(width=8)

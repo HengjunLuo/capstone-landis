@@ -3,6 +3,8 @@ import pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import tkinter as tk
+
 
 from backend import classifier
 from backend import keylogger
@@ -330,12 +332,51 @@ def check_status():
 
 
 def plot():
-    gui_app.ax.imshow(keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(keylogger.get_session_dataframe('keyboard')))
-    gui_app.canvas.draw_idle()
+    data = keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(keylogger.get_session_dataframe('keyboard'))
+    # gui_app.ax.imshow(data)
+    # gui_app.pyplot_canvas.draw_idle()
+
+    gui_app.image_canvas.delete("all") # Clear the canvas
+
+    gui_app.image_canvas.create_image(0, 10, anchor=tk.NW, image=gui_app.kb_image)
+    gui_app.image_canvas.create_image(580, 25, anchor=tk.NW, image=gui_app.ms_image)
+
+    for key in keyboard_heatmap.KeyboardHeatmap.keyBindings:
+        highlight_key(key, 
+            data[0][keyboard_heatmap.KeyboardHeatmap.keyBindings.index(key)],
+            data[1][keyboard_heatmap.KeyboardHeatmap.keyBindings.index(key)])
+
     if keylogger.running:
         gui_app.after(500, plot)
 
-    
+
+# Mapping of coordinates for each key
+g_key_coords = {
+    "w": (113, 67 ),  "a": (85 , 104),  "s": (122, 104),  "d": (159, 104),
+    ".": (403, 141),  "q": (75 , 66 ),  "v": (215, 141),  "b": (253, 141),
+    "r": (188, 67 ),  "1": (56 , 29 ),  "2": (94 , 29 ),  "3": (131, 29 ),
+    "4": (169, 29 ),  "5": (206, 29 ),  "6": (243, 29 ),  "7": (281, 29 ),
+    "8": (319, 29 ),  "9": (356, 29 ),  "0": (394, 29 ),  
+    "Key.tab":   (28 , 67 ), "Key.space":  (258, 178), "Key.ctrl_l":  (24 , 178), 
+    "Key.comma": (366, 141), "Mouse.left": (640, 60 ), "Mouse.right": (682, 60 )
+}
+
+def highlight_key(key, frequency, duration):
+    x, y = g_key_coords[key]
+    size = frequency * 15
+    r = hex(min(int(duration * 200), 255))[2:]
+    if len(r) == 1: 
+        r = '0' + r
+    g = hex(max(int(255 - (duration * 650)), 0))[2:]
+    if len(g) == 1: 
+        g = '0' + g
+    draw_circle(x, y, size, f"#{r[0:2]}{g[0:2]}ff")
+
+def draw_circle(x, y, size, color):
+    if size != 0:
+        size += 8 # Minimum circle size
+        gui_app.image_canvas.create_oval(x - (size / 2), y - (size / 2), 
+            x + (size / 2), y + (size / 2), fill=color, outline='')
 
 def bind():
     # Assign settings widget behavior
