@@ -60,6 +60,7 @@ def configure_status_widgets(gui_app):
 
     #gui_app.lbl_prediction.grid(row=5, column=1, padx=10)
     gui_app.lbl_predicted.grid(row=6, column=2, columnspan=3, sticky='w')
+    gui_app.lbl_predicted_confidence.grid(row=7, column=2, columnspan=3, sticky='w')
 
     # Fill text fields with initial values
     actions.update_lbl_status("Not started")

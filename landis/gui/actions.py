@@ -37,8 +37,43 @@ def update_prediction(seglength):
         # Get prediction matrix 
         prediction = gui_app.classifier.predict(session_df, seglength)
         # Print prediction matrix, 2 indices for binary and 6 for non binary
-        gui_app.lbl_predicted['text'] = prediction
+        gui_app.lbl_predicted_confidence['text'] = prediction
+        #gui_app.lbl_predicted['text'] = prediction
 
+        # binary, added in a yellow color for 40%-60% confidence, we can remove this or add a smaller/larger interval as we see fit
+        if len(prediction) == 2:
+            if prediction[1] > 0.6:
+                gui_app.lbl_predicted.config(bg="green")
+                gui_app.lbl_predicted['text'] = "Non-Fraudulent"
+            elif prediction[1] > 0.4 and prediction[1] < 0.6:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Uncertain"
+            else:
+                gui_app.lbl_predicted.config(bg="red")
+                gui_app.lbl_predicted['text'] = "Fraudulent"
+        # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
+        elif len(prediction) == 6:
+            if prediction[0] > 0.5:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Hengjun " + str(prediction[0]*100) + "% Confident"
+            elif prediction[1] > 0.5:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Jonathan " + str(prediction[1]*100) + "% Confident"
+            elif prediction[2] > 0.5:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Joseph " + str(prediction[2]*100) + "% Confident"
+            elif prediction[3] > 0.5:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Marco " + str(prediction[3]*100) + "% Confident"
+            elif prediction[4] > 0.5:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Mitchell " + str(prediction[4]*100) + "% Confident"
+            elif prediction[5] > 0.5:
+                gui_app.lbl_predicted.config(bg="yellow")
+                gui_app.lbl_predicted['text'] = "Zirui " + str(prediction[5]*100) + "% Confident"
+            else:
+                gui_app.lbl_predicted.config(bg="red")
+                gui_app.lbl_predicted['text'] = "Unrecognized Player"
 
         # Code for fraudulent/non-fraudulent commented out below
        
@@ -51,7 +86,7 @@ def update_prediction(seglength):
             #gui_app.lbl_predicted['text'] = "Fraudulent"
         
         # Old code left here in case we don't like change
-        
+
         #gui_app.curr_prediction.set(
             #f"{gui_app.curr_method.get()}: {prediction}")
 

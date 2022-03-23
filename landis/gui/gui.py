@@ -85,7 +85,10 @@ class LandisLogger(tk.Tk):
 
         self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
         #self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=20)
-        self.lbl_predicted = tk.Label(self.frm_status, text = "---", width=20)
+        
+        # added second label to display confidence levels along with new GUI display, increased width from 20 to 25
+        self.lbl_predicted = tk.Label(self.frm_status, text = "---", width=25)
+        self.lbl_predicted_confidence = tk.Label(self.frm_status, text = "---", width=25)
 
         self.lbl_profile = tk.Label(self.frm_status, text='Profile:')
         self.lbl_character = tk.Label(self.frm_status, text='Character:')
