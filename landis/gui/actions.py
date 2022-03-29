@@ -52,9 +52,9 @@ def update_prediction(seglength):
                 gui_app.lbl_predicted.config(bg="red")
                 gui_app.lbl_predicted['text'] = "Fraudulent"
         # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
-        elif len(prediction) == len(values.profiles)-1:
+        elif len(prediction) == len(values.profiles):
             # Made code cleaner
-            for x in range(len(values.profiles)-1):
+            for x in range(len(values.profiles)):
                 if prediction[x] > 0.5:
                     gui_app.lbl_predicted.config(bg="yellow")
                     gui_app.lbl_predicted['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
