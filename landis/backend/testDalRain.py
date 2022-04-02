@@ -28,7 +28,7 @@ Y_actual = []
 # For confusion matrix plotting
 labels = []
 
-target = "NON"
+target = ""
 
 for k in range(len(keyboard)):
     l = None
