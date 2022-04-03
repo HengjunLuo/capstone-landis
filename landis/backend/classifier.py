@@ -29,7 +29,7 @@ class LANDIS_classifier:
 
         # Return if no data for prediction
         if session_data.empty:
-            return (0, 0)
+            return 0
 
         if self.classifier:
             # Isolate inputs from last [seglength] seconds

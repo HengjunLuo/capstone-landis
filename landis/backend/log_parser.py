@@ -30,11 +30,11 @@ returns: Pandas DataFrame
 *Note* Segment length determines index, i.e. "The 5th 15-second segment"
 """
 def get_segment(parsedFile, index = -1, seg_length=60):
-    # Calculate first and last second of segment
 
     if index == -1: # default means we return all of the data unsegmented
         return parsedFile
     
+    # Calculate first and last second of segment
     last_sec = (index + 1) * seg_length
     first_sec = last_sec - seg_length
 

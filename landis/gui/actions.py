@@ -9,6 +9,7 @@ import tkinter as tk
 from backend import classifier
 from backend import keylogger
 from backend import keyboard_heatmap
+from backend import log_parser
 
 from gui import values
 
@@ -332,22 +333,30 @@ def check_status():
 
 
 def plot():
-    data = keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(keylogger.get_session_dataframe('keyboard'))
-    # gui_app.ax.imshow(data)
-    # gui_app.pyplot_canvas.draw_idle()
+    # Get entire session as a dataframe
+    session_df = keylogger.get_session_dataframe('keyboard')
+    # Get last 60s of gameplay
+    segment = session_df
+    if not session_df.empty:
+        segment = session_df[session_df.time > (session_df.time.iloc[-1] - 60.0)]
+    # Extract relevant features
+    data = keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(segment)
+    
+    # Clear the canvas
+    gui_app.image_canvas.delete("all")
 
-    gui_app.image_canvas.delete("all") # Clear the canvas
-
+    # Draw keyboard and mouse images
     gui_app.image_canvas.create_image(0, 10, anchor=tk.NW, image=gui_app.kb_image)
     gui_app.image_canvas.create_image(580, 25, anchor=tk.NW, image=gui_app.ms_image)
 
+    # Draw highlights for each key
     for key in keyboard_heatmap.KeyboardHeatmap.keyBindings:
         highlight_key(key, 
             data[0][keyboard_heatmap.KeyboardHeatmap.keyBindings.index(key)],
             data[1][keyboard_heatmap.KeyboardHeatmap.keyBindings.index(key)])
 
     if keylogger.running:
-        gui_app.after(500, plot)
+        gui_app.after(10, plot)
 
 
 # Mapping of coordinates for each key
@@ -363,7 +372,7 @@ g_key_coords = {
 
 def highlight_key(key, frequency, duration):
     x, y = g_key_coords[key]
-    size = frequency * 15
+    size = frequency * 25
     r = hex(min(int(duration * 200), 255))[2:]
     if len(r) == 1: 
         r = '0' + r
