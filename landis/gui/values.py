@@ -5,13 +5,14 @@ keylog_filename = "key.log"
 mouselog_filename = "mouse.log"
 
 # Profiles to choose from
+# Changed profiles and targets to the order it appears in the prediction matrix - For use in the prediction label
 profiles = [
-    "JON",
-    "MAR",
-    "ZIR",
-    "JOS",
     "HEN",
+    "JON",
+    "JOS",
+    "MAR",
     "MIT",
+    "ZIR",
     "OTH"
 ]
 
@@ -36,11 +37,11 @@ methods = [
 ]
 
 targets = [
-    "JON",
-    "MAR",
-    "ZIR",
-    "JOS",
     "HEN",
+    "JON",
+    "JOS",
+    "MAR",
     "MIT",
+    "ZIR",
     "NON"
 ]
