@@ -26,6 +26,11 @@ class LandisLogger(tk.Tk):
     def __init__(self):
         super().__init__()
 
+        # Window dimensions
+        _windowwidth = 800
+        _windowheight = 550
+
+        # Setup actions module
         actions.gui_app = self
 
         # Load user preferences and update logger
@@ -50,113 +55,84 @@ class LandisLogger(tk.Tk):
 
         # To keep track of logger running status
         self.started = False
+        # Text control variable used for showing elapsed time
+        self.elapsed_time = tk.StringVar()
+        self.elapsed_time.set("00m 00s")
 
         # Default to using the default log directories
         self.use_default_dir = tk.IntVar()
         self.use_default_dir.set(1)
 
-
-        # Window dimensions
-        _windowwidth = 800
-        _windowheight = 450
-
-        # Main window settings
+        # Initialize main window settings
         config.configure_window(self, _windowwidth, _windowheight)
 
         # ----- Frame widgets -----
-        self.frm_status = tk.Frame(self, width=_windowwidth)
-        self.collapse = frames.CollapsableFrame(self, "settings")
-        self.frm_settings = tk.Frame(self.collapse.sub_frame, width=_windowwidth)
-        config.configure_frames(self, _windowwidth, _windowheight)
+        self.frm_logger     = tk.Frame(self)
+        self.frm_classifier = tk.Frame(self)
+        self.frm_status     = tk.Frame(self)
+        self.frm_settings   = tk.Frame(self)
+        self.heatmap_canvas = tk.Canvas(self, bg='#eee', width=750)
 
-
-        # ----- Status widgets -----
-        # Text control variable used for showing elapsed time
-        self.elapsed_time = tk.StringVar()
-        self.elapsed_time.set("00m 00s")
-
-        # Create widgets
-        self.lbl_running = tk.Label(self.frm_status, width=25, font=('Helvetica', 20, 'bold'))
-        self.btn_toggle = tk.Button(self.frm_status, text='Start', width=7,bg='lightskyblue')
-        self.btn_stop   = tk.Button(self.frm_status, text='Stop',  width=7, state='disabled')
-        self.btn_save   = tk.Button(self.frm_status, text='Save',  width=7, state='disabled')
-        self.btn_verify = tk.Button(self.frm_status, text='Verify', width=11, state='disabled')
-        self.lbl_result = tk.Label(self.frm_status, text="Result:",width=7)
-
-        self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
-        #self.lbl_predicted = tk.Label(self.frm_status, textvariable=self.curr_prediction, width=20)
-        
-        # added second label to display confidence levels along with new GUI display, increased width from 20 to 25
-        self.lbl_predicted = tk.Label(self.frm_status, text = "---", width=25)
-        self.lbl_predicted_confidence = tk.Label(self.frm_status, text = "---", width=25)
-
-        self.lbl_profile = tk.Label(self.frm_status, text='Profile:')
-        self.lbl_character = tk.Label(self.frm_status, text='Character:')
-        self.lbl_method = tk.Label(self.frm_status, text='Method:')
-        self.lbl_target = tk.Label(self.frm_status, text='Target:')
-        self.btn_profile = tk.OptionMenu(self.frm_status, self.curr_profile, *values.profiles)
-        self.btn_character = tk.OptionMenu(self.frm_status, self.curr_character, *values.characters)
-        self.btn_method = tk.OptionMenu(self.frm_status, self.curr_method, *values.methods)
-        self.btn_target = tk.OptionMenu(self.frm_status, self.curr_target, *values.targets)
-
-        self.lbl_loglength = tk.Label(self.frm_status, text="Log length:",font=('Helvetica',9,'bold'))
-        self.lbl_time = tk.Label(self.frm_status, textvariable=self.elapsed_time, width=6)
-
-        # ------------------
-        # ------------------
-        # ------------------
-        # ------------------
-        # PLACEHOLDER FIGURE FOR KEYBOARD HEATMAP
-        self.image_canvas = tk.Canvas(self, bg='#eee', width=750)
-        self.image_canvas.grid(row=2, column=0)
+        # Load heatmap background images
         self.kb_image = tk.PhotoImage(file="images/qwerty-kb.gif")
         self.ms_image = tk.PhotoImage(file="images/mouse.gif")
-        self.image_canvas.create_image(0, 10, anchor=tk.NW, image=self.kb_image)
-        self.image_canvas.create_image(580, 25, anchor=tk.NW, image=self.ms_image)
 
-        # self.fig = plt.figure(figsize=(9,3))
-        # self.ax = self.fig.add_subplot(111)
-        # self.pyplot_canvas = FigureCanvasTkAgg(self.fig, master=self)
-        # self.pyplot_canvas.get_tk_widget().grid(row=2, column=0)
-        # self.ax.set_xticks((np.arange(len(keyboard_heatmap.KeyboardHeatmap.keyBindings))))
-        # self.ax.set_xticklabels(keyboard_heatmap.KeyboardHeatmap.keyBindings)
-        # self.ax.set_yticks(np.arange(len(['Frequency','Duration'])))
-        # self.ax.set_yticklabels(['Frequency','Duration'])
-        # plt.setp(self.ax.get_xticklabels(), rotation=-90)
-        # self.ax.imshow(np.zeros((2,25)))
+        # Position frames in window
+        config.configure_frames(self, _windowwidth, _windowheight)
 
+        # ----- Logger widgets -----
+        self.lbl_running   = tk.Label(self.frm_logger, width=25, font=('Helvetica', 20, 'bold'))
+        self.lbl_loglength = tk.Label(self.frm_logger, text="Log length:",font=('Helvetica',9,'bold'))
+        self.lbl_time      = tk.Label(self.frm_logger, textvariable=self.elapsed_time, width=6)
 
-        # ------------------
-        # ------------------
-        # ------------------
-        # ------------------
+        # ----- Classifier widgets -----
+        self.lbl_method = tk.Label(self.frm_classifier, text='Method:')
+        self.btn_method = tk.OptionMenu(self.frm_classifier, self.curr_method, *values.methods)
+        self.lbl_target = tk.Label(self.frm_classifier, text='Target:')
+        self.btn_target = tk.OptionMenu(self.frm_classifier, self.curr_target, *values.targets)
+        self.btn_verify = tk.Button(self.frm_classifier, text='Verify', width=11, state='disabled')
 
+        # ----- Status widgets -----
+        # Logger control
+        self.btn_toggle     = tk.Button(self.frm_status, text='Start', width=7,bg='lightskyblue')
+        self.btn_stop       = tk.Button(self.frm_status, text='Stop',  width=7, state='disabled')
+        self.btn_save       = tk.Button(self.frm_status, text='Save',  width=7, state='disabled')
+        # Classifier results
+        self.lbl_results     = tk.Label(self.frm_status, text="Result:",width=7)
+        self.lbl_prediction = tk.Label(self.frm_status, text="Prediction:")
+        self.lbl_pred       = tk.Label(self.frm_status, text = "---", width=25)
+        self.lbl_pred_conf  = tk.Label(self.frm_status, text = "---", width=25)
+        
         # ----- Settings widgets -----
-        # Title and info bar
-        self.lbl_settings_info = tk.Label(self.frm_settings, font=("Helvetica", 10, "italic"))
-
+        # Profile modification
+        self.lbl_profile = tk.Label(self.frm_settings, text='Profile:')
+        self.btn_profile = tk.OptionMenu(self.frm_settings, self.curr_profile, *values.profiles)
         # Pause key modification
         self.lbl_pausekey = tk.Label(self.frm_settings, width=10)
         self.ent_pausekey = tk.Entry(self.frm_settings, width=10, state='readonly', 
                 readonlybackground='white', justify='center')
         self.btn_setpausekey = tk.Button(self.frm_settings, text="Set pause key")
-
         # Log directories modification
         self.chk_override = tk.Checkbutton(self.frm_settings, text="Override default directory", variable=self.use_default_dir)
         self.lbl_log_dir = tk.Label(self.frm_settings, width=30)
         self.ent_log_dir = tk.Entry(self.frm_settings, state='disabled')
         self.btn_set_log_dir = tk.Button(self.frm_settings, text="Set directory", width=11, state='disabled')
+        # Info bar (along bottom, hidden initially)
+        self.lbl_settings_info = tk.Label(self.frm_settings, font=("Helvetica", 10, "italic"))
 
+        # Position widgets
+        config.configure_logger_widgets(self)
+        config.configure_classifier_widgets(self)
         config.configure_status_widgets(self)
         config.configure_settings_widgets(self)
 
+        # Initialize keylogger values
         keylogger.set_pause_key(self.pausekey)
         keylogger.set_profile(self.curr_profile.get())
         keylogger.set_character(self.curr_character.get())
-
-        # Set default log directory for keylogger
         keylogger.set_log_directory(actions.get_default_log_directory())
 
+        # Bind actions to inputs
         actions.bind()
 
 

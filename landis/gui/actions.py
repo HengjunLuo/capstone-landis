@@ -40,29 +40,29 @@ def update_prediction(seglength):
         # Get prediction matrix 
         prediction = gui_app.classifier.predict(session_df, seglength)
         # Print prediction matrix, 2 indices for binary and 6 for non binary
-        gui_app.lbl_predicted_confidence['text'] = prediction
-        #gui_app.lbl_predicted['text'] = prediction
+        gui_app.lbl_pred_conf['text'] = prediction
+        #gui_app.lbl_pred['text'] = prediction
 
         i = 0
         # binary
         if len(prediction) == 2:
             if prediction[1] > 0.6:
-                gui_app.lbl_predicted.config(bg="green")
-                gui_app.lbl_predicted['text'] = "Non-Fraudulent"
+                gui_app.lbl_pred.config(bg="green")
+                gui_app.lbl_pred['text'] = "Non-Fraudulent"
             else:
-                gui_app.lbl_predicted.config(bg="red")
-                gui_app.lbl_predicted['text'] = "Fraudulent"
+                gui_app.lbl_pred.config(bg="red")
+                gui_app.lbl_pred['text'] = "Fraudulent"
         # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
         elif len(prediction) == len(values.profiles):
             # Made code cleaner
             for x in range(len(values.profiles)):
                 if prediction[x] > 0.5:
-                    gui_app.lbl_predicted.config(bg="yellow")
-                    gui_app.lbl_predicted['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
+                    gui_app.lbl_pred.config(bg="yellow")
+                    gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
                     i = 1
             if i == 0:
-                gui_app.lbl_predicted.config(bg="red")
-                gui_app.lbl_predicted['text'] = "Unrecognized Player"
+                gui_app.lbl_pred.config(bg="red")
+                gui_app.lbl_pred['text'] = "Unrecognized Player"
         
         # Old code left here in case we don't like change
 
@@ -75,9 +75,9 @@ def update_prediction(seglength):
 
 # Emulates a loading screen with three dots (...)
 def loading(dots):
-    gui_app.lbl_predicted.config(bg="white")
+    gui_app.lbl_pred.config(bg="white")
     for x in dots:
-        gui_app.lbl_predicted['text'] = x
+        gui_app.lbl_pred['text'] = x
         gui_app.update_idletasks()
         time.sleep(0.5)
 
@@ -319,11 +319,11 @@ def plot():
     data = keyboard_heatmap.KeyboardHeatmap.heatmap_data_gui(segment)
     
     # Clear the canvas
-    gui_app.image_canvas.delete("all")
+    gui_app.heatmap_canvas.delete("all")
 
     # Draw keyboard and mouse images
-    gui_app.image_canvas.create_image(0, 10, anchor=tk.NW, image=gui_app.kb_image)
-    gui_app.image_canvas.create_image(580, 25, anchor=tk.NW, image=gui_app.ms_image)
+    gui_app.heatmap_canvas.create_image(0, 10, anchor=tk.NW, image=gui_app.kb_image)
+    gui_app.heatmap_canvas.create_image(580, 25, anchor=tk.NW, image=gui_app.ms_image)
 
     # Draw highlights for each key
     for key in keyboard_heatmap.KeyboardHeatmap.keyBindings:
@@ -332,7 +332,7 @@ def plot():
             data[1][keyboard_heatmap.KeyboardHeatmap.keyBindings.index(key)])
 
     if keylogger.running:
-        gui_app.after(10, plot)
+        gui_app.after(250, plot)
 
 
 # Mapping of coordinates for each key
@@ -360,7 +360,7 @@ def highlight_key(key, frequency, duration):
 def draw_circle(x, y, size, color):
     if size != 0:
         size += 8 # Minimum circle size
-        gui_app.image_canvas.create_oval(x - (size / 2), y - (size / 2), 
+        gui_app.heatmap_canvas.create_oval(x - (size / 2), y - (size / 2), 
             x + (size / 2), y + (size / 2), fill=color, outline='')
 
 def bind():
@@ -370,7 +370,6 @@ def bind():
     gui_app.btn_save.bind('<ButtonRelease-1>', save_log)
     gui_app.btn_verify.bind('<ButtonRelease-1>', verify)
     gui_app.curr_profile.trace('w', set_profile)
-    gui_app.curr_character.trace('w', set_character)
     gui_app.curr_method.trace('w', set_classifier)
     gui_app.curr_target.trace('w', set_classifier)
 
