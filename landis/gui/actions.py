@@ -64,13 +64,9 @@ def update_prediction(seglength):
             gui_app.lbl_pred_conf6['text'] = values.profiles[5] + " " + str(round(prediction[5]*100, 0)) + "%"
             # Made code cleaner
             for x in range(len(values.profiles)-1):
-                if prediction[x] > 0.5:
+                if max(prediction) == prediction[x]:
                     gui_app.lbl_pred.config(bg="yellow")
-                    gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
-                    i = 1
-            if i == 0:
-                gui_app.lbl_pred.config(bg="red")
-                gui_app.lbl_pred['text'] = "Unrecognized Player"
+                    gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(int(prediction[x]*100)) + "% Confident"
         # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
         elif gui_app.classifier.target == "NON":
             gui_app.lbl_pred_conf1['text'] = values.profiles[0] + " " + str(round(prediction[0]*100, 0)) + "%"
@@ -81,9 +77,9 @@ def update_prediction(seglength):
             gui_app.lbl_pred_conf6['text'] = "OTH " + str(round(prediction[5]*100, 0)) + "%"
             # Made code cleaner
             for x in range(len(values.profiles)-1):
-                if prediction[x] > 0.5:
+                if max(prediction) == prediction[x]:
                     gui_app.lbl_pred.config(bg="yellow")
-                    gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
+                    gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(int(prediction[x]*100)) + "% Confident"
                     i = 1
             if i == 0:
                 gui_app.lbl_pred.config(bg="red")
@@ -212,7 +208,7 @@ def stop_keylogger(event):
     gui_app.lbl_pred_conf4['text'] = "---"
     gui_app.lbl_pred_conf5['text'] = "---"
     gui_app.lbl_pred_conf6['text'] = "---"
-    gui_app.lbl_pred_conf7['text'] = "---"
+    #gui_app.lbl_pred_conf7['text'] = "---"
     gui_app.lbl_pred.config(bg="white")
 
 def verify(event):
