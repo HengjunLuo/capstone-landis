@@ -28,7 +28,7 @@ with open(".routing", 'r', encoding='utf-8') as f:
         elif 'mouse.log' in path:
             mouse.append(parse_mouse_log(path))
 
-seg_length = 60
+seg_length = 90
 
 # Ahh yes... the quintessential target class non nonbinary... it'll make sense later
 target = "NON"
