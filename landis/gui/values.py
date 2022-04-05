@@ -16,6 +16,24 @@ profiles = [
     "OTH"
 ]
 
+profilesGRP = [
+    "HEN",
+    "JON",
+    "JOS",
+    "MAR",
+    "MIT",
+    "ZIR"
+]
+
+profilesOTH = [
+    "HEN",
+    "JON",
+    "JOS",
+    "MAR",
+    "MIT",
+    "OTH"
+]
+
 characters = [
     "SCO",
     "SOL",

@@ -55,30 +55,30 @@ def update_prediction(seglength):
             gui_app.lbl_pred_conf1['text'] = str(round(prediction[1]*100, 0)) + "% Confident"
     # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
     elif gui_app.classifier.target == "GRP":
-        gui_app.lbl_pred_conf1['text'] = values.profiles[0] + " " + str(round(prediction[0]*100, 0)) + "%"
-        gui_app.lbl_pred_conf2['text'] = values.profiles[1] + " " + str(round(prediction[1]*100, 0)) + "%"
-        gui_app.lbl_pred_conf3['text'] = values.profiles[2] + " " + str(round(prediction[2]*100, 0)) + "%"
-        gui_app.lbl_pred_conf4['text'] = values.profiles[3] + " " + str(round(prediction[3]*100, 0)) + "%"
-        gui_app.lbl_pred_conf5['text'] = values.profiles[4] + " " + str(round(prediction[4]*100, 0)) + "%"
-        gui_app.lbl_pred_conf6['text'] = values.profiles[5] + " " + str(round(prediction[5]*100, 0)) + "%"
+        gui_app.lbl_pred_conf1['text'] = values.profilesGRP[0] + " " + str(round(prediction[0]*100, 0)) + "%"
+        gui_app.lbl_pred_conf2['text'] = values.profilesGRP[1] + " " + str(round(prediction[1]*100, 0)) + "%"
+        gui_app.lbl_pred_conf3['text'] = values.profilesGRP[2] + " " + str(round(prediction[2]*100, 0)) + "%"
+        gui_app.lbl_pred_conf4['text'] = values.profilesGRP[3] + " " + str(round(prediction[3]*100, 0)) + "%"
+        gui_app.lbl_pred_conf5['text'] = values.profilesGRP[4] + " " + str(round(prediction[4]*100, 0)) + "%"
+        gui_app.lbl_pred_conf6['text'] = values.profilesGRP[5] + " " + str(round(prediction[5]*100, 0)) + "%"
         # Made code cleaner
         for x in range(len(values.profiles)-1):
             if max(prediction) == prediction[x]:
                 gui_app.lbl_pred.config(bg="yellow")
-                gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(int(prediction[x]*100)) + "% Confident"
+                gui_app.lbl_pred['text'] = values.profilesGRP[x] + " " + str(int(prediction[x]*100)) + "% Confident"
     # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
     elif gui_app.classifier.target == "NON":
-        gui_app.lbl_pred_conf1['text'] = values.profiles[0] + " " + str(round(prediction[0]*100, 0)) + "%"
-        gui_app.lbl_pred_conf2['text'] = values.profiles[1] + " " + str(round(prediction[1]*100, 0)) + "%"
-        gui_app.lbl_pred_conf3['text'] = values.profiles[2] + " " + str(round(prediction[2]*100, 0)) + "%"
-        gui_app.lbl_pred_conf4['text'] = values.profiles[3] + " " + str(round(prediction[3]*100, 0)) + "%"
-        gui_app.lbl_pred_conf5['text'] = values.profiles[4] + " " + str(round(prediction[4]*100, 0)) + "%"
-        gui_app.lbl_pred_conf6['text'] = "OTH " + str(round(prediction[5]*100, 0)) + "%"
+        gui_app.lbl_pred_conf1['text'] = values.profilesOTH[0] + " " + str(round(prediction[0]*100, 0)) + "%"
+        gui_app.lbl_pred_conf2['text'] = values.profilesOTH[1] + " " + str(round(prediction[1]*100, 0)) + "%"
+        gui_app.lbl_pred_conf3['text'] = values.profilesOTH[2] + " " + str(round(prediction[2]*100, 0)) + "%"
+        gui_app.lbl_pred_conf4['text'] = values.profilesOTH[3] + " " + str(round(prediction[3]*100, 0)) + "%"
+        gui_app.lbl_pred_conf5['text'] = values.profilesOTH[4] + " " + str(round(prediction[4]*100, 0)) + "%"
+        gui_app.lbl_pred_conf6['text'] = values.profilesOTH[5] + " " + str(round(prediction[5]*100, 0)) + "%"
         # Made code cleaner
         for x in range(len(values.profiles)-1):
             if max(prediction) == prediction[x]:
                 gui_app.lbl_pred.config(bg="yellow")
-                gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(int(prediction[x]*100)) + "% Confident"
+                gui_app.lbl_pred['text'] = values.profilesOTH[x] + " " + str(int(prediction[x]*100)) + "% Confident"
                 i = 1
         if i == 0:
             gui_app.lbl_pred.config(bg="red")
