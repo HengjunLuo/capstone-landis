@@ -34,6 +34,7 @@ def configure_frames(gui_app, windowwidth, windowheight):
     gui_app.frm_classifier.columnconfigure(0, minsize=30)
     gui_app.frm_status.columnconfigure(0, minsize=75)
     gui_app.frm_status.columnconfigure(4, minsize=50)
+    gui_app.frm_status.rowconfigure(2, minsize=15)
     gui_app.frm_settings.columnconfigure(2, minsize=30)
     gui_app.frm_settings.rowconfigure(1, minsize=15)
     gui_app.frm_settings.rowconfigure(4, minsize=15)
@@ -72,7 +73,7 @@ def configure_status_widgets(gui_app):
     gui_app.lbl_pred_conf4.grid(row=6, column=0, columnspan=5)
     gui_app.lbl_pred_conf5.grid(row=7, column=0, columnspan=5)
     gui_app.lbl_pred_conf6.grid(row=8, column=0, columnspan=5)
-    gui_app.lbl_pred_conf7.grid(row=9, column=0, columnspan=5)
+    # gui_app.lbl_pred_conf7.grid(row=9, column=0, columnspan=5)
 
 def configure_settings_widgets(gui_app):
     gui_app.lbl_profile.grid(row=0, column=0, sticky="e", padx=5)

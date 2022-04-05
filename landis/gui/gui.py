@@ -107,7 +107,7 @@ class LandisLogger(tk.Tk):
         self.lbl_pred_conf4  = tk.Label(self.frm_status, text = "---", width=25)
         self.lbl_pred_conf5  = tk.Label(self.frm_status, text = "---", width=25)
         self.lbl_pred_conf6  = tk.Label(self.frm_status, text = "---", width=25)
-        self.lbl_pred_conf7  = tk.Label(self.frm_status, text = "---", width=25)
+        # self.lbl_pred_conf7  = tk.Label(self.frm_status, text = "---", width=25)
         
         # ----- Settings widgets -----
         # Profile modification
