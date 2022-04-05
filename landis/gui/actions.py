@@ -55,7 +55,24 @@ def update_prediction(seglength):
                 gui_app.lbl_pred['text'] = "Fraudulent"
                 gui_app.lbl_pred_conf1['text'] = str(round(prediction[0]*100, 0)) + "% Confident"
         # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
-        elif len(prediction) == len(values.profiles):
+        elif len(prediction) == 6:
+            gui_app.lbl_pred_conf1['text'] = values.profiles[0] + " " + str(round(prediction[0]*100, 0)) + "%"
+            gui_app.lbl_pred_conf2['text'] = values.profiles[1] + " " + str(round(prediction[1]*100, 0)) + "%"
+            gui_app.lbl_pred_conf3['text'] = values.profiles[2] + " " + str(round(prediction[2]*100, 0)) + "%"
+            gui_app.lbl_pred_conf4['text'] = values.profiles[3] + " " + str(round(prediction[3]*100, 0)) + "%"
+            gui_app.lbl_pred_conf5['text'] = values.profiles[4] + " " + str(round(prediction[4]*100, 0)) + "%"
+            gui_app.lbl_pred_conf6['text'] = values.profiles[5] + " " + str(round(prediction[5]*100, 0)) + "%"
+            # Made code cleaner
+            for x in range(len(values.profiles)):
+                if prediction[x] > 0.5:
+                    gui_app.lbl_pred.config(bg="yellow")
+                    gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
+                    i = 1
+            if i == 0:
+                gui_app.lbl_pred.config(bg="red")
+                gui_app.lbl_pred['text'] = "Unrecognized Player"
+        # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
+        elif len(prediction) == 7:
             gui_app.lbl_pred_conf1['text'] = values.profiles[0] + " " + str(round(prediction[0]*100, 0)) + "%"
             gui_app.lbl_pred_conf2['text'] = values.profiles[1] + " " + str(round(prediction[1]*100, 0)) + "%"
             gui_app.lbl_pred_conf3['text'] = values.profiles[2] + " " + str(round(prediction[2]*100, 0)) + "%"
