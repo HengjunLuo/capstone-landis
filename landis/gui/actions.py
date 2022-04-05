@@ -63,7 +63,7 @@ def update_prediction(seglength):
             gui_app.lbl_pred_conf5['text'] = values.profiles[4] + " " + str(round(prediction[4]*100, 0)) + "%"
             gui_app.lbl_pred_conf6['text'] = values.profiles[5] + " " + str(round(prediction[5]*100, 0)) + "%"
             # Made code cleaner
-            for x in range(len(values.profiles)):
+            for x in range(len(values.profiles)-1):
                 if prediction[x] > 0.5:
                     gui_app.lbl_pred.config(bg="yellow")
                     gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
@@ -80,7 +80,7 @@ def update_prediction(seglength):
             gui_app.lbl_pred_conf5['text'] = values.profiles[4] + " " + str(round(prediction[4]*100, 0)) + "%"
             gui_app.lbl_pred_conf6['text'] = "OTH " + str(round(prediction[5]*100, 0)) + "%"
             # Made code cleaner
-            for x in range(len(values.profiles)):
+            for x in range(len(values.profiles)-1):
                 if prediction[x] > 0.5:
                     gui_app.lbl_pred.config(bg="yellow")
                     gui_app.lbl_pred['text'] = values.profiles[x] + " " + str(prediction[x]*100) + "% Confident"
