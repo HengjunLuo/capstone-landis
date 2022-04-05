@@ -65,8 +65,14 @@ def configure_status_widgets(gui_app):
     gui_app.btn_save.grid  (row=0, column=3, padx=5)
     # Prediction results
     gui_app.lbl_results.grid  (row=1, column=0, pady=10)
-    gui_app.lbl_pred.grid     (row=2, column=0, columnspan=5)
-    gui_app.lbl_pred_conf.grid(row=3, column=0, columnspan=5)
+    gui_app.lbl_pred.grid     (row=1, column=0, columnspan=5)
+    gui_app.lbl_pred_conf1.grid(row=3, column=0, columnspan=5)
+    gui_app.lbl_pred_conf2.grid(row=4, column=0, columnspan=5)
+    gui_app.lbl_pred_conf3.grid(row=5, column=0, columnspan=5)
+    gui_app.lbl_pred_conf4.grid(row=6, column=0, columnspan=5)
+    gui_app.lbl_pred_conf5.grid(row=7, column=0, columnspan=5)
+    gui_app.lbl_pred_conf6.grid(row=8, column=0, columnspan=5)
+    gui_app.lbl_pred_conf7.grid(row=9, column=0, columnspan=5)
 
 def configure_settings_widgets(gui_app):
     gui_app.lbl_profile.grid(row=0, column=0, sticky="e", padx=5)

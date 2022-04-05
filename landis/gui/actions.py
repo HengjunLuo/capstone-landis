@@ -40,7 +40,7 @@ def update_prediction(seglength):
         # Get prediction matrix 
         prediction = gui_app.classifier.predict(session_df, seglength)
         # Print prediction matrix, 2 indices for binary and 6 for non binary
-        gui_app.lbl_pred_conf['text'] = prediction
+        gui_app.lbl_pred_conf1['text'] = prediction
         #gui_app.lbl_pred['text'] = prediction
 
         i = 0
@@ -49,11 +49,20 @@ def update_prediction(seglength):
             if prediction[1] > 0.6:
                 gui_app.lbl_pred.config(bg="green")
                 gui_app.lbl_pred['text'] = "Non-Fraudulent"
+                gui_app.lbl_pred_conf1['text'] = str(round(prediction[1]*100, 0)) + "% Confident" 
             else:
                 gui_app.lbl_pred.config(bg="red")
                 gui_app.lbl_pred['text'] = "Fraudulent"
+                gui_app.lbl_pred_conf1['text'] = str(round(prediction[0]*100, 0)) + "% Confident"
         # non binary, chose yellow as display color as the classifier is making a prediction (guess). We can tune this 50% value as we see fit
         elif len(prediction) == len(values.profiles):
+            gui_app.lbl_pred_conf1['text'] = values.profiles[0] + " " + str(round(prediction[0]*100, 0)) + "%"
+            gui_app.lbl_pred_conf2['text'] = values.profiles[1] + " " + str(round(prediction[1]*100, 0)) + "%"
+            gui_app.lbl_pred_conf3['text'] = values.profiles[2] + " " + str(round(prediction[2]*100, 0)) + "%"
+            gui_app.lbl_pred_conf4['text'] = values.profiles[3] + " " + str(round(prediction[3]*100, 0)) + "%"
+            gui_app.lbl_pred_conf5['text'] = values.profiles[4] + " " + str(round(prediction[4]*100, 0)) + "%"
+            gui_app.lbl_pred_conf6['text'] = values.profiles[5] + " " + str(round(prediction[5]*100, 0)) + "%"
+            gui_app.lbl_pred_conf7['text'] = values.profiles[6] + " " + str(round(prediction[6]*100, 0)) + "%"
             # Made code cleaner
             for x in range(len(values.profiles)):
                 if prediction[x] > 0.5:
@@ -76,6 +85,13 @@ def update_prediction(seglength):
 # Emulates a loading screen with three dots (...)
 def loading(dots):
     gui_app.lbl_pred.config(bg="white")
+    gui_app.lbl_pred_conf1['text'] = "---"
+    gui_app.lbl_pred_conf2['text'] = "---"
+    gui_app.lbl_pred_conf3['text'] = "---"
+    gui_app.lbl_pred_conf4['text'] = "---"
+    gui_app.lbl_pred_conf5['text'] = "---"
+    gui_app.lbl_pred_conf6['text'] = "---"
+    gui_app.lbl_pred_conf7['text'] = "---"
     for x in dots:
         gui_app.lbl_pred['text'] = x
         gui_app.update_idletasks()
@@ -172,6 +188,16 @@ def stop_keylogger(event):
     gui_app.btn_stop['state'] = 'disabled'
     gui_app.btn_save['state'] = 'normal'
     update_lbl_status("Stopped")
+    # Reset prediction labels
+    gui_app.lbl_pred['text'] = "---"
+    gui_app.lbl_pred_conf1['text'] = "---"
+    gui_app.lbl_pred_conf2['text'] = "---"
+    gui_app.lbl_pred_conf3['text'] = "---"
+    gui_app.lbl_pred_conf4['text'] = "---"
+    gui_app.lbl_pred_conf5['text'] = "---"
+    gui_app.lbl_pred_conf6['text'] = "---"
+    gui_app.lbl_pred_conf7['text'] = "---"
+    gui_app.lbl_pred.config(bg="white")
 
 def verify(event):
     seglength = min(60, keylogger.elapsed_time())
